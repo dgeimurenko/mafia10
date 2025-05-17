@@ -44,7 +44,7 @@ io.on('connection', socket => {
   function updateUsers() {
     const list = Object.values(users)
       .sort((a, b) => a.slot - b.slot)
-      .map(u => ({ nickname: u.nickname, slot: u.slot }));
+      .map(u => ({ nickname: u.nickname, slot: u.slot, role: u.role }));
     io.emit('updateUsers', list);
   }
 

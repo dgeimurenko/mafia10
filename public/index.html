@@ -96,9 +96,11 @@
 
     socket.on('updateUsers', users => {
       usersList.innerHTML = '';
-      users.forEach(({ nickname, slot }) => {
+      users.forEach(({ nickname, slot, role }) => {
         const li = document.createElement('li');
-        li.textContent = `#${slot}: ${nickname}`;
+        li.innerHTML = `#${slot}: ${nickname} 
+          <span class="spoiler" onclick="toggleSpoiler(this)">[Spoiler]</span>
+          <span class="role" style="display:none;">${role}</span>`;
         usersList.appendChild(li);
       });
     });
