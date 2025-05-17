@@ -6,58 +6,72 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
-// Список ролей
+// Роли
 const roles = [
   'Мирный', 'Мирный', 'Мирный', 'Мирный', 'Мирный', 'Мирный',
   'Шериф', 'Мафия', 'Мафия', 'Дон Мафии'
 ];
 
-// Онлайн игроки и их роли
+// Игроки
 let players = [];
+let gameStarted = false;
+let gameInProgress = false;
 
+// Статическая папка для HTML и JS
 app.use(express.static('public'));
 
+// Подключение нового игрока
 io.on('connection', (socket) => {
-  console.log('New player connected: ' + socket.id);
+  console.log(`Player connected: ${socket.id}`);
 
-  // При подключении нового игрока сохраняем его данные
+  // Добавляем игрока
   socket.on('setName', (data) => {
-    // Сохраняем имя и номер игрока
-    players.push({ id: socket.id, name: data.name, slot: data.slot, role: null });
+    players.push({ id: socket.id, name: data.name, role: null, slot: players.length + 1 });
     io.emit('updatePlayerList', players);
   });
 
-  // Когда суперюзер запускает игру
+  // Начало игры
   socket.on('startGame', () => {
-    // Рандомное распределение ролей
+    if (gameStarted || players.length < 2) {
+      return;
+    }
+
+    // Перемешиваем роли
     let shuffledRoles = roles.slice();
     shuffledRoles.sort(() => Math.random() - 0.5);
 
-    // Назначаем роль каждому игроку
+    // Назначаем роли
     players.forEach((player, index) => {
-      player.role = shuffledRoles[index]; // Назначаем роль
+      player.role = shuffledRoles[index];
     });
 
-    // Озвучивание для каждого игрока
-    players.forEach((player, index) => {
-      io.to(player.id).emit('gameStart', { message: `Игрок номер ${player.slot}, открой глаза, посмотри на свою роль в этой игре.` });
-      io.to(player.id).emit('showRole', { role: player.role });
-    });
+    gameStarted = true;
 
-    // Сообщаем всем игрокам, что роли назначены
+    // Озвучивание начала игры
+    io.emit('gameStart', 'Игра началась! Всем игрокам нужно закрыть глаза.');
     setTimeout(() => {
-      io.emit('gameStarted', 'Все роли назначены. Все игроки засыпают.');
-    }, 3000); // Задержка для озвучивания
+      io.emit('gameStart', 'Мафия, просыпайтесь и выбирайте свою жертву.');
+      setTimeout(() => {
+        io.emit('gameStart', 'Шериф, просыпайся и выбирай кого расследовать.');
+        setTimeout(() => {
+          io.emit('gameStart', 'Ночь закончена, все засыпают.');
+          io.emit('gameStart', 'День настал. Обсуждение.');
+        }, 5000); // Шериф действия
+      }, 5000); // Мафия действия
+    }, 3000); // Ночь начинается
+
+    io.emit('updatePlayerList', players);
   });
 
   // Отключение игрока
   socket.on('disconnect', () => {
-    console.log('Player disconnected: ' + socket.id);
+    console.log(`Player disconnected: ${socket.id}`);
     players = players.filter(player => player.id !== socket.id);
     io.emit('updatePlayerList', players);
   });
 });
 
+// Запуск сервера
 server.listen(3000, () => {
   console.log('Server is running on http://localhost:3000');
 });
