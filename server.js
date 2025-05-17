@@ -1,82 +1,63 @@
 const express = require('express');
 const http = require('http');
-const socketIO = require('socket.io');
+const socketIo = require('socket.io');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIO(server);
+const io = socketIo(server);
 
-let users = {}; // socket.id -> { nickname, slot, role }
+// Список ролей
+const roles = [
+  'Мирный', 'Мирный', 'Мирный', 'Мирный', 'Мирный', 'Мирный',
+  'Шериф', 'Мафия', 'Мафия', 'Дон Мафии'
+];
+
+// Онлайн игроки и их роли
+let players = [];
 
 app.use(express.static('public'));
 
-app.use((req, res, next) => {
-  res.setHeader('Content-Type', 'text/html; charset=UTF-8');
-  next();
-});
+io.on('connection', (socket) => {
+  console.log('New player connected: ' + socket.id);
 
-io.on('connection', socket => {
-  socket.on('setPlayerInfo', ({ nickname, slot }) => {
-    users[socket.id] = {
-      nickname,
-      slot: parseInt(slot),
-      role: null
-    };
-    updateUsers();
+  // При подключении нового игрока сохраняем его данные
+  socket.on('setName', (data) => {
+    // Сохраняем имя и номер игрока
+    players.push({ id: socket.id, name: data.name, slot: data.slot, role: null });
+    io.emit('updatePlayerList', players);
   });
 
+  // Когда суперюзер запускает игру
   socket.on('startGame', () => {
-    const roles = [
-      'Мирный', 'Мирный', 'Мирный', 'Мирный', 'Мирный', 'Мирный', 
-      'Шериф', 'Мафия', 'Мафия', 'Дон Мафии'
-    ];
-    const shuffledRoles = shuffleArray(roles);
+    // Рандомное распределение ролей
+    let shuffledRoles = roles.slice();
+    shuffledRoles.sort(() => Math.random() - 0.5);
 
-    let index = 0;
-    for (const id in users) {
-      users[id].role = shuffledRoles[index++];
-    }
+    // Назначаем роль каждому игроку
+    players.forEach((player, index) => {
+      player.role = shuffledRoles[index]; // Назначаем роль
+    });
 
-    // Broadcasting to all players in order of their slot number
-    let roleRevealSequence = usersSortedBySlot();
-    io.emit('announceStart', roleRevealSequence);
+    // Озвучивание для каждого игрока
+    players.forEach((player, index) => {
+      io.to(player.id).emit('gameStart', { message: `Игрок номер ${player.slot}, открой глаза, посмотри на свою роль в этой игре.` });
+      io.to(player.id).emit('showRole', { role: player.role });
+    });
 
-    // After all roles are shown, tell players mafia is waking up
+    // Сообщаем всем игрокам, что роли назначены
     setTimeout(() => {
-      io.emit('announceMafiaWakeup');
-    }, (roleRevealSequence.length + 1) * 4000); // Wait for all role reveals
-
-    updateUsers();
+      io.emit('gameStarted', 'Все роли назначены. Все игроки засыпают.');
+    }, 3000); // Задержка для озвучивания
   });
 
+  // Отключение игрока
   socket.on('disconnect', () => {
-    delete users[socket.id];
-    updateUsers();
+    console.log('Player disconnected: ' + socket.id);
+    players = players.filter(player => player.id !== socket.id);
+    io.emit('updatePlayerList', players);
   });
-
-  function updateUsers() {
-    const list = usersSortedBySlot().map(u => ({
-      nickname: u.nickname,
-      slot: u.slot,
-      role: u.role // role will be used on the client side under the spoiler
-    }));
-    io.emit('updateUsers', list);
-  }
-
-  function usersSortedBySlot() {
-    return Object.values(users).sort((a, b) => a.slot - b.slot);
-  }
-
-  function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-  }
 });
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+server.listen(3000, () => {
+  console.log('Server is running on http://localhost:3000');
 });

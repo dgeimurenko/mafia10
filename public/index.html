@@ -3,115 +3,69 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Online Users</title>
+  <title>Game</title>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 40px; }
-    ul { list-style: none; padding: 0; }
-    input { padding: 8px; margin: 10px; }
-    #startGame { margin: 20px; padding: 10px 20px; font-size: 16px; }
+    #role {
+      display: none;
+      font-size: 20px;
+      color: white;
+      background-color: black;
+      padding: 10px;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
-  <h1>👥 Онлайн игроки</h1>
-  <div>
-    <input type="text" id="nickname" placeholder="Введите свой ник" />
-    <input type="number" id="slot" placeholder="Выберите свой номер (1-10)" min="1" max="10" />
-    <button onclick="setPlayerInfo()">Присоединиться</button>
+  <h1>Мафия</h1>
+  <div id="playerInfo">
+    <label for="name">Введите имя:</label>
+    <input type="text" id="name" placeholder="Ваше имя">
+    <button id="setName">Подтвердить</button>
   </div>
-  <ul id="users"></ul>
 
-  <button id="startGame" style="display:none;" onclick="startGame()">Начать игру</button>
+  <div id="gameControls" style="display:none;">
+    <button id="startGame">Начать игру</button>
+  </div>
+
+  <div id="role"></div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
-    const usersList = document.getElementById('users');
-    const nicknameInput = document.getElementById('nickname');
-    const slotInput = document.getElementById('slot');
-    const startButton = document.getElementById('startGame');
 
-    const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'b';
+    // Выбор имени и слота игрока
+    let playerName = '';
+    let playerSlot = 0;
 
-    // Check if user is already in sessionStorage
-    const storedNickname = sessionStorage.getItem('nickname');
-    const storedSlot = sessionStorage.getItem('slot');
+    document.getElementById('setName').onclick = () => {
+      playerName = document.getElementById('name').value;
+      playerSlot = Math.floor(Math.random() * 10) + 1; // Присваиваем случайный слот (1-10)
+      socket.emit('setName', { name: playerName, slot: playerSlot });
+      document.getElementById('playerInfo').style.display = 'none';
+      document.getElementById('gameControls').style.display = 'block';
+    };
 
-    if (storedNickname && storedSlot) {
-      nicknameInput.value = storedNickname;
-      slotInput.value = storedSlot;
-      setPlayerInfo(); // Automatically set player info if available in sessionStorage
-    }
-
-    if (isAdmin) {
-      startButton.style.display = 'inline-block';
-    }
-
-    function setPlayerInfo() {
-      const nickname = nicknameInput.value.trim() || "Аноним";
-      const slot = parseInt(slotInput.value);
-      if (!slot || slot < 1 || slot > 10) {
-        alert("Номер игрока должен быть от 1 до 10.");
-        return;
-      }
-
-      // Save the nickname and slot in sessionStorage to preserve on page reload
-      sessionStorage.setItem('nickname', nickname);
-      sessionStorage.setItem('slot', slot);
-
-      socket.emit('setPlayerInfo', { nickname, slot });
-      nicknameInput.disabled = true;
-      slotInput.disabled = true;
-    }
-
-    function startGame() {
+    // Старт игры
+    document.getElementById('startGame').onclick = () => {
       socket.emit('startGame');
-    }
+    };
 
-    socket.on('updateUsers', users => {
-      usersList.innerHTML = '';
-      users.forEach(({ nickname, slot, role }) => {
-        const li = document.createElement('li');
-        li.innerHTML = `#${slot}: ${nickname}`;
-        usersList.appendChild(li);
-      });
+    // Слушаем начало игры и показываем роль игроку
+    socket.on('gameStart', (data) => {
+      alert(data.message);  // Озвучивание или уведомление игрока
     });
 
-    socket.on('announceStart', (userSequence) => {
-      let sequenceIndex = 0;
-      const interval = setInterval(() => {
-        const player = userSequence[sequenceIndex];
-        const message = `Игрок номер ${player.slot}, открой глаза, посмотри на свою роль в этой игре.`;
-        speakMessage(message);
-
-        // Show the role after the player hears the message
-        setTimeout(() => {
-          socket.emit('gameStarted');
-          sequenceIndex++;
-          if (sequenceIndex >= userSequence.length) {
-            clearInterval(interval);
-            speakMessage("Все роли выбраны. Все игроки спят. Теперь Мафия просыпается и встречается. У вас есть 1 минута. Игра начинается!");
-          }
-        }, 2000); // Wait for 2 seconds between messages
-
-      }, 4000); // Next player after 4 seconds
+    // Показываем роль игроку
+    socket.on('showRole', (data) => {
+      const roleDiv = document.getElementById('role');
+      roleDiv.innerHTML = `Ваша роль: ${data.role}`;
+      roleDiv.style.display = 'block';
     });
 
-    socket.on('announceMafiaWakeup', () => {
-      speakMessage("Все роли выбраны. Все игроки спят. Теперь Мафия просыпается и встречается. У вас есть 1 минута. Игра начинается!");
+    // Когда игра началась
+    socket.on('gameStarted', (message) => {
+      alert(message);
     });
-
-    socket.on('gameStarted', (role) => {
-      // Show the role to the player after the voice message
-      setTimeout(() => {
-        alert(`Ваша роль: ${role}`);
-      }, 2000);
-    });
-
-    function speakMessage(message) {
-      const msg = new SpeechSynthesisUtterance(message);
-      msg.lang = 'ru-RU';  // Устанавливаем язык на русский
-      speechSynthesis.speak(msg);
-    }
   </script>
 </body>
 </html>
