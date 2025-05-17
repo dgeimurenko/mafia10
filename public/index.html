@@ -23,6 +23,13 @@
       border-radius: 10px;
       font-size: 24px;
     }
+    .spoiler {
+      color: gray;
+      cursor: pointer;
+    }
+    .spoiler.open {
+      color: black;
+    }
   </style>
 </head>
 <body>
@@ -52,6 +59,16 @@
 
     const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'b';
 
+    // Check if user is already in sessionStorage
+    const storedNickname = sessionStorage.getItem('nickname');
+    const storedSlot = sessionStorage.getItem('slot');
+
+    if (storedNickname && storedSlot) {
+      nicknameInput.value = storedNickname;
+      slotInput.value = storedSlot;
+      setPlayerInfo(); // Automatically set player info if available in sessionStorage
+    }
+
     if (isAdmin) {
       startButton.style.display = 'inline-block';
     }
@@ -63,6 +80,11 @@
         alert("Slot must be between 1 and 10.");
         return;
       }
+
+      // Save the nickname and slot in sessionStorage to preserve on page reload
+      sessionStorage.setItem('nickname', nickname);
+      sessionStorage.setItem('slot', slot);
+
       socket.emit('setPlayerInfo', { nickname, slot });
       nicknameInput.disabled = true;
       slotInput.disabled = true;
@@ -81,10 +103,26 @@
       });
     });
 
-    socket.on('gameStarted', number => {
+    socket.on('gameStarted', role => {
       modal.style.display = 'flex';
-      modalContent.textContent = `Your random number is: ${number}`;
+      modalContent.innerHTML = `
+        <div>
+          <p>Your role is: <span class="spoiler" onclick="toggleSpoiler(this)">[Spoiler]</span></p>
+          <p class="role" style="display:none;">${role}</p>
+        </div>
+      `;
     });
+
+    function toggleSpoiler(element) {
+      const role = element.nextElementSibling;
+      if (role.style.display === 'none') {
+        role.style.display = 'block';
+        element.classList.add('open');
+      } else {
+        role.style.display = 'none';
+        element.classList.remove('open');
+      }
+    }
 
     modal.addEventListener('click', () => {
       modal.style.display = 'none';

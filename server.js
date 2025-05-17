@@ -6,7 +6,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
 
-let users = {}; // socket.id -> { nickname, slot, randomNumber }
+let users = {}; // socket.id -> { nickname, slot, role }
 
 app.use(express.static('public'));
 
@@ -15,18 +15,22 @@ io.on('connection', socket => {
     users[socket.id] = {
       nickname,
       slot: parseInt(slot),
-      randomNumber: null
+      role: null
     };
     updateUsers();
   });
 
   socket.on('startGame', () => {
-    const shuffled = shuffleNumbers(1, 10);
-    let index = 0;
+    const roles = [
+      'Мирный', 'Мирный', 'Мирный', 'Мирный', 'Мирный', 'Мирный', 
+      'Шериф', 'Мафия', 'Мафия', 'Дон Мафии'
+    ];
+    const shuffledRoles = shuffleArray(roles);
 
+    let index = 0;
     for (const id in users) {
-      users[id].randomNumber = shuffled[index++];
-      io.to(id).emit('gameStarted', users[id].randomNumber);
+      users[id].role = shuffledRoles[index++];
+      io.to(id).emit('gameStarted', users[id].role);
     }
 
     updateUsers();
@@ -44,14 +48,12 @@ io.on('connection', socket => {
     io.emit('updateUsers', list);
   }
 
-  function shuffleNumbers(min, max) {
-    const numbers = [];
-    for (let i = min; i <= max; i++) numbers.push(i);
-    for (let i = numbers.length - 1; i > 0; i--) {
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+      [array[i], array[j]] = [array[j], array[i]];
     }
-    return numbers;
+    return array;
   }
 });
 
