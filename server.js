@@ -30,7 +30,6 @@ io.on('connection', socket => {
     let index = 0;
     for (const id in users) {
       users[id].role = shuffledRoles[index++];
-      io.to(id).emit('gameStarted', users[id].role);
     }
 
     // Broadcasting to all players in order of their slot number

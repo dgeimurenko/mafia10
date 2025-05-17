@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <title>Online Users</title>
@@ -8,44 +8,18 @@
     ul { list-style: none; padding: 0; }
     input { padding: 8px; margin: 10px; }
     #startGame { margin: 20px; padding: 10px 20px; font-size: 16px; }
-    #modal {
-      display: none;
-      position: fixed;
-      left: 0; top: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
-      justify-content: center;
-      align-items: center;
-    }
-    #modalContent {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      font-size: 24px;
-    }
-    .spoiler {
-      color: gray;
-      cursor: pointer;
-    }
-    .spoiler.open {
-      color: black;
-    }
   </style>
 </head>
 <body>
-  <h1>?? Online Users</h1>
+  <h1>?? Онлайн игроки</h1>
   <div>
-    <input type="text" id="nickname" placeholder="Enter your nickname" />
-    <input type="number" id="slot" placeholder="Choose your number (1-10)" min="1" max="10" />
-    <button onclick="setPlayerInfo()">Join</button>
+    <input type="text" id="nickname" placeholder="Введите свой ник" />
+    <input type="number" id="slot" placeholder="Выберите свой номер (1-10)" min="1" max="10" />
+    <button onclick="setPlayerInfo()">Присоединиться</button>
   </div>
   <ul id="users"></ul>
 
-  <button id="startGame" style="display:none;" onclick="startGame()">Start Game</button>
-
-  <div id="modal">
-    <div id="modalContent"></div>
-  </div>
+  <button id="startGame" style="display:none;" onclick="startGame()">Начать игру</button>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
@@ -54,8 +28,6 @@
     const nicknameInput = document.getElementById('nickname');
     const slotInput = document.getElementById('slot');
     const startButton = document.getElementById('startGame');
-    const modal = document.getElementById('modal');
-    const modalContent = document.getElementById('modalContent');
 
     const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'b';
 
@@ -74,10 +46,10 @@
     }
 
     function setPlayerInfo() {
-      const nickname = nicknameInput.value.trim() || "Anonymous";
+      const nickname = nicknameInput.value.trim() || "Аноним";
       const slot = parseInt(slotInput.value);
       if (!slot || slot < 1 || slot > 10) {
-        alert("Slot must be between 1 and 10.");
+        alert("Номер игрока должен быть от 1 до 10.");
         return;
       }
 
@@ -107,7 +79,7 @@
       let sequenceIndex = 0;
       const interval = setInterval(() => {
         const player = userSequence[sequenceIndex];
-        const message = `Player number ${player.slot}, open your eyes, look at your role this game.`;
+        const message = `Игрок номер ${player.slot}, открой глаза, посмотри на свою роль в этой игре.`;
         speakMessage(message);
 
         // Show the role after the player hears the message
@@ -116,7 +88,7 @@
           sequenceIndex++;
           if (sequenceIndex >= userSequence.length) {
             clearInterval(interval);
-            speakMessage("All roles are selected. All users are asleep. Now Mafia wakes up and meets each other. You have 1 minute. It starts now!");
+            speakMessage("Все роли выбраны. Все игроки спят. Теперь Мафия просыпается и встречается. У вас есть 1 минута. Игра начинается!");
           }
         }, 2000); // Wait for 2 seconds between messages
 
@@ -124,11 +96,19 @@
     });
 
     socket.on('announceMafiaWakeup', () => {
-      speakMessage("All roles are selected. All users are asleep. Now Mafia wakes up and meets each other. You have 1 minute. It starts now!");
+      speakMessage("Все роли выбраны. Все игроки спят. Теперь Мафия просыпается и встречается. У вас есть 1 минута. Игра начинается!");
+    });
+
+    socket.on('gameStarted', (role) => {
+      // Show the role to the player after the voice message
+      setTimeout(() => {
+        alert(`Ваша роль: ${role}`);
+      }, 2000);
     });
 
     function speakMessage(message) {
       const msg = new SpeechSynthesisUtterance(message);
+      msg.lang = 'ru-RU';  // Устанавливаем язык на русский
       speechSynthesis.speak(msg);
     }
   </script>
