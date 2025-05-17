@@ -1,7 +1,7 @@
 {
-  "name": "online-users-site",
+  "name": "online-users-game",
   "version": "1.0.0",
-  "description": "Simple real-time site to display online users with nicknames",
+  "description": "Real-time user list with admin-controlled game start",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
