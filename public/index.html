@@ -12,15 +12,15 @@
   </style>
 </head>
 <body>
-  <h1>?? Онлайн игроки</h1>
+  <h1>рџ‘Ґ РћРЅР»Р°Р№РЅ РёРіСЂРѕРєРё</h1>
   <div>
-    <input type="text" id="nickname" placeholder="Введите свой ник" />
-    <input type="number" id="slot" placeholder="Выберите свой номер (1-10)" min="1" max="10" />
-    <button onclick="setPlayerInfo()">Присоединиться</button>
+    <input type="text" id="nickname" placeholder="Р’РІРµРґРёС‚Рµ СЃРІРѕР№ РЅРёРє" />
+    <input type="number" id="slot" placeholder="Р’С‹Р±РµСЂРёС‚Рµ СЃРІРѕР№ РЅРѕРјРµСЂ (1-10)" min="1" max="10" />
+    <button onclick="setPlayerInfo()">РџСЂРёСЃРѕРµРґРёРЅРёС‚СЊСЃСЏ</button>
   </div>
   <ul id="users"></ul>
 
-  <button id="startGame" style="display:none;" onclick="startGame()">Начать игру</button>
+  <button id="startGame" style="display:none;" onclick="startGame()">РќР°С‡Р°С‚СЊ РёРіСЂСѓ</button>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
@@ -47,10 +47,10 @@
     }
 
     function setPlayerInfo() {
-      const nickname = nicknameInput.value.trim() || "Аноним";
+      const nickname = nicknameInput.value.trim() || "РђРЅРѕРЅРёРј";
       const slot = parseInt(slotInput.value);
       if (!slot || slot < 1 || slot > 10) {
-        alert("Номер игрока должен быть от 1 до 10.");
+        alert("РќРѕРјРµСЂ РёРіСЂРѕРєР° РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РѕС‚ 1 РґРѕ 10.");
         return;
       }
 
@@ -80,7 +80,7 @@
       let sequenceIndex = 0;
       const interval = setInterval(() => {
         const player = userSequence[sequenceIndex];
-        const message = `Игрок номер ${player.slot}, открой глаза, посмотри на свою роль в этой игре.`;
+        const message = `РРіСЂРѕРє РЅРѕРјРµСЂ ${player.slot}, РѕС‚РєСЂРѕР№ РіР»Р°Р·Р°, РїРѕСЃРјРѕС‚СЂРё РЅР° СЃРІРѕСЋ СЂРѕР»СЊ РІ СЌС‚РѕР№ РёРіСЂРµ.`;
         speakMessage(message);
 
         // Show the role after the player hears the message
@@ -89,7 +89,7 @@
           sequenceIndex++;
           if (sequenceIndex >= userSequence.length) {
             clearInterval(interval);
-            speakMessage("Все роли выбраны. Все игроки спят. Теперь Мафия просыпается и встречается. У вас есть 1 минута. Игра начинается!");
+            speakMessage("Р’СЃРµ СЂРѕР»Рё РІС‹Р±СЂР°РЅС‹. Р’СЃРµ РёРіСЂРѕРєРё СЃРїСЏС‚. РўРµРїРµСЂСЊ РњР°С„РёСЏ РїСЂРѕСЃС‹РїР°РµС‚СЃСЏ Рё РІСЃС‚СЂРµС‡Р°РµС‚СЃСЏ. РЈ РІР°СЃ РµСЃС‚СЊ 1 РјРёРЅСѓС‚Р°. РРіСЂР° РЅР°С‡РёРЅР°РµС‚СЃСЏ!");
           }
         }, 2000); // Wait for 2 seconds between messages
 
@@ -97,19 +97,19 @@
     });
 
     socket.on('announceMafiaWakeup', () => {
-      speakMessage("Все роли выбраны. Все игроки спят. Теперь Мафия просыпается и встречается. У вас есть 1 минута. Игра начинается!");
+      speakMessage("Р’СЃРµ СЂРѕР»Рё РІС‹Р±СЂР°РЅС‹. Р’СЃРµ РёРіСЂРѕРєРё СЃРїСЏС‚. РўРµРїРµСЂСЊ РњР°С„РёСЏ РїСЂРѕСЃС‹РїР°РµС‚СЃСЏ Рё РІСЃС‚СЂРµС‡Р°РµС‚СЃСЏ. РЈ РІР°СЃ РµСЃС‚СЊ 1 РјРёРЅСѓС‚Р°. РРіСЂР° РЅР°С‡РёРЅР°РµС‚СЃСЏ!");
     });
 
     socket.on('gameStarted', (role) => {
       // Show the role to the player after the voice message
       setTimeout(() => {
-        alert(`Ваша роль: ${role}`);
+        alert(`Р’Р°С€Р° СЂРѕР»СЊ: ${role}`);
       }, 2000);
     });
 
     function speakMessage(message) {
       const msg = new SpeechSynthesisUtterance(message);
-      msg.lang = 'ru-RU';  // Устанавливаем язык на русский
+      msg.lang = 'ru-RU';  // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј СЏР·С‹Рє РЅР° СЂСѓСЃСЃРєРёР№
       speechSynthesis.speak(msg);
     }
   </script>
