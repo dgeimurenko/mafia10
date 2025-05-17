@@ -98,37 +98,39 @@
       usersList.innerHTML = '';
       users.forEach(({ nickname, slot, role }) => {
         const li = document.createElement('li');
-        li.innerHTML = `#${slot}: ${nickname} 
-          <span class="spoiler" onclick="toggleSpoiler(this)">[Spoiler]</span>
-          <span class="role" style="display:none;">${role}</span>`;
+        li.innerHTML = `#${slot}: ${nickname}`;
         usersList.appendChild(li);
       });
     });
 
-    socket.on('gameStarted', role => {
-      modal.style.display = 'flex';
-      modalContent.innerHTML = `
-        <div>
-          <p>Your role is: <span class="spoiler" onclick="toggleSpoiler(this)">[Spoiler]</span></p>
-          <p class="role" style="display:none;">${role}</p>
-        </div>
-      `;
+    socket.on('announceStart', (userSequence) => {
+      let sequenceIndex = 0;
+      const interval = setInterval(() => {
+        const player = userSequence[sequenceIndex];
+        const message = `Player number ${player.slot}, open your eyes, look at your role this game.`;
+        speakMessage(message);
+
+        // Show the role after the player hears the message
+        setTimeout(() => {
+          socket.emit('gameStarted');
+          sequenceIndex++;
+          if (sequenceIndex >= userSequence.length) {
+            clearInterval(interval);
+            speakMessage("All roles are selected. All users are asleep. Now Mafia wakes up and meets each other. You have 1 minute. It starts now!");
+          }
+        }, 2000); // Wait for 2 seconds between messages
+
+      }, 4000); // Next player after 4 seconds
     });
 
-    function toggleSpoiler(element) {
-      const role = element.nextElementSibling;
-      if (role.style.display === 'none') {
-        role.style.display = 'block';
-        element.classList.add('open');
-      } else {
-        role.style.display = 'none';
-        element.classList.remove('open');
-      }
+    socket.on('announceMafiaWakeup', () => {
+      speakMessage("All roles are selected. All users are asleep. Now Mafia wakes up and meets each other. You have 1 minute. It starts now!");
+    });
+
+    function speakMessage(message) {
+      const msg = new SpeechSynthesisUtterance(message);
+      speechSynthesis.speak(msg);
     }
-
-    modal.addEventListener('click', () => {
-      modal.style.display = 'none';
-    });
   </script>
 </body>
 </html>

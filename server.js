@@ -33,6 +33,15 @@ io.on('connection', socket => {
       io.to(id).emit('gameStarted', users[id].role);
     }
 
+    // Broadcasting to all players in order of their slot number
+    let roleRevealSequence = usersSortedBySlot();
+    io.emit('announceStart', roleRevealSequence);
+
+    // After all roles are shown, tell players mafia is waking up
+    setTimeout(() => {
+      io.emit('announceMafiaWakeup');
+    }, (roleRevealSequence.length + 1) * 4000); // Wait for all role reveals
+
     updateUsers();
   });
 
@@ -42,10 +51,16 @@ io.on('connection', socket => {
   });
 
   function updateUsers() {
-    const list = Object.values(users)
-      .sort((a, b) => a.slot - b.slot)
-      .map(u => ({ nickname: u.nickname, slot: u.slot, role: u.role }));
+    const list = usersSortedBySlot().map(u => ({
+      nickname: u.nickname,
+      slot: u.slot,
+      role: u.role // role will be used on the client side under the spoiler
+    }));
     io.emit('updateUsers', list);
+  }
+
+  function usersSortedBySlot() {
+    return Object.values(users).sort((a, b) => a.slot - b.slot);
   }
 
   function shuffleArray(array) {
