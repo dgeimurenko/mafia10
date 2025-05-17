@@ -10,6 +10,11 @@ let users = {}; // socket.id -> { nickname, slot, role }
 
 app.use(express.static('public'));
 
+app.use((req, res, next) => {
+  res.setHeader('Content-Type', 'text/html; charset=UTF-8');
+  next();
+});
+
 io.on('connection', socket => {
   socket.on('setPlayerInfo', ({ nickname, slot }) => {
     users[socket.id] = {
