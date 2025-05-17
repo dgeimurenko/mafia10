@@ -4,24 +4,36 @@
   <meta charset="UTF-8">
   <title>Online Users</title>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 50px; }
+    body { font-family: sans-serif; text-align: center; padding: 40px; }
     ul { list-style: none; padding: 0; }
+    input { padding: 8px; margin: 10px; }
   </style>
 </head>
 <body>
-  <h1>?? Пользователи онлайн:</h1>
+  <h1>?? Online Users</h1>
+  <div>
+    <input type="text" id="nickname" placeholder="Enter your nickname" />
+    <button onclick="setNickname()">Join</button>
+  </div>
   <ul id="users"></ul>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
     const usersList = document.getElementById('users');
+    const nicknameInput = document.getElementById('nickname');
+
+    function setNickname() {
+      const nickname = nicknameInput.value.trim() || "Anonymous";
+      socket.emit('setNickname', nickname);
+      nicknameInput.disabled = true;
+    }
 
     socket.on('updateUsers', users => {
       usersList.innerHTML = '';
-      users.forEach(id => {
+      users.forEach(name => {
         const li = document.createElement('li');
-        li.textContent = `User: ${id}`;
+        li.textContent = name;
         usersList.appendChild(li);
       });
     });

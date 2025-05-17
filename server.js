@@ -6,21 +6,23 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
 
-let onlineUsers = new Set();
+let users = {}; // socket.id -> nickname
 
 app.use(express.static('public'));
 
 io.on('connection', socket => {
-  onlineUsers.add(socket.id);
-  io.emit('updateUsers', Array.from(onlineUsers));
+  socket.on('setNickname', nickname => {
+    users[socket.id] = nickname || 'Anonymous';
+    io.emit('updateUsers', Object.values(users));
+  });
 
   socket.on('disconnect', () => {
-    onlineUsers.delete(socket.id);
-    io.emit('updateUsers', Array.from(onlineUsers));
+    delete users[socket.id];
+    io.emit('updateUsers', Object.values(users));
   });
 });
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });

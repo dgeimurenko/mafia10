@@ -1,7 +1,7 @@
 {
   "name": "online-users-site",
   "version": "1.0.0",
-  "description": "Simple site to show online users using socket.io",
+  "description": "Simple real-time site to display online users with nicknames",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
