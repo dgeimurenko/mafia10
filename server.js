@@ -120,6 +120,131 @@ function sendRoles() {
 }
 
 // ======================
+// Начало классической ночи
+// ======================
+
+function startMafiaPhase() {
+
+    gameState = "mafia";
+
+
+    voice(
+        "Просыпается мафия. У мафии одна минута на договорку начинается сейчас."
+    );
+
+
+    players.forEach(player => {
+
+
+        if(
+            player.role === "Мафия" ||
+            player.role === "Дон Мафии"
+        ){
+
+            io.to(player.id).emit(
+                "mafiaTimer",
+                70
+            );
+
+        }
+
+
+    });
+
+
+
+    setTimeout(()=>{
+
+
+        voice(
+            "Договорка окончена. Засыпайте."
+        );
+
+
+
+        setTimeout(()=>{
+
+
+            startSheriffPhase();
+
+
+        },10000);
+
+
+
+    },70000);
+
+
+}
+
+
+
+
+
+function startSheriffPhase(){
+
+
+    gameState="sheriff";
+
+
+    voice(
+        "Шериф может осмотреть город."
+    );
+
+
+
+    const sheriff =
+        players.find(
+            p =>
+            p.role === "Шериф" &&
+            p.alive
+        );
+
+
+
+    if(sheriff){
+
+
+        io.to(sheriff.id).emit(
+            "sheriffAction"
+        );
+
+
+    }
+
+
+
+    setTimeout(()=>{
+
+
+        voice(
+            "Шериф засыпает."
+        );
+
+
+
+        setTimeout(()=>{
+
+
+            voice(
+                "Город просыпается."
+            );
+
+
+            gameState="day";
+
+
+        },10000);
+
+
+
+    },10000);
+
+
+
+}
+
+// ======================
 // Логика ночи
 // ======================
 
@@ -365,16 +490,30 @@ io.on("connection", socket => {
 
 
         if (
-            acceptedPlayers === players.length
-        ) {
+    acceptedPlayers === players.length
+) {
 
 
-            io.emit(
-                "allRolesAccepted"
-            );
+    gameState="night";
 
 
-        }
+    io.emit(
+        "allRolesAccepted"
+    );
+
+
+
+    setTimeout(()=>{
+
+
+        startMafiaPhase();
+
+
+    },3000);
+
+
+
+}
 
 
     });

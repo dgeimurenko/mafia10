@@ -634,6 +634,50 @@ results=>{
 
 });
 
+socket.on(
+"mafiaTimer",
+seconds=>{
+
+
+    if(!timer)
+        return;
+
+
+
+    timer.style.display="block";
+
+
+    let time=seconds;
+
+
+
+    timer.innerText=time;
+
+
+
+    const interval=setInterval(()=>{
+
+
+        time--;
+
+
+        timer.innerText=time;
+
+
+
+        if(time<=0){
+
+            clearInterval(interval);
+
+            timer.innerText="";
+
+        }
+
+
+    },1000);
+
+
+});
 
 
 socket.on(
