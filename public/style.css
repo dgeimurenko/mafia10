@@ -1,178 +1,327 @@
 * {
-    margin: 0;
-    padding: 0;
     box-sizing: border-box;
 }
 
+
 body {
-    font-family: Arial, Helvetica, sans-serif;
+
+    margin: 0;
+
+    padding: 20px;
+
+    font-family: Arial, sans-serif;
+
     background: #111;
+
     color: white;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+
+    text-align: center;
+
 }
 
-#login,
-#game,
-#adminPanel {
-    width: 100%;
-    max-width: 420px;
-    padding: 25px;
-    text-align: center;
-}
+
 
 h1 {
-    margin-bottom: 25px;
-    font-size: 42px;
+
+    font-size: 40px;
+
+    margin-bottom: 30px;
+
 }
 
-h2 {
-    margin-bottom: 20px;
+
+
+.box {
+
+    background: #222;
+
+    max-width: 500px;
+
+    margin: 20px auto;
+
+    padding: 25px;
+
+    border-radius: 15px;
+
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+
 }
 
-h3 {
-    margin: 20px 0 10px;
-}
+
 
 input {
-    width: 100%;
+
+    width: 90%;
+
+    max-width: 350px;
+
     padding: 15px;
+
     font-size: 20px;
+
+    border-radius: 10px;
+
     border: none;
-    border-radius: 12px;
-    outline: none;
-    margin-bottom: 20px;
+
+    margin: 10px;
+
+    text-align: center;
+
 }
+
+
 
 button {
-    width: 100%;
-    padding: 15px;
+
+    padding: 15px 25px;
+
+    margin: 8px;
+
     font-size: 20px;
-    border: none;
+
     border-radius: 12px;
-    background: #2d7dff;
-    color: white;
+
+    border: none;
+
     cursor: pointer;
-    transition: .2s;
+
+    background: #444;
+
+    color: white;
+
 }
+
+
 
 button:hover {
-    background: #1d65d8;
+
+    background: #666;
+
 }
 
-button:active {
-    transform: scale(.98);
-}
 
-#roleBox {
-    margin-top: 30px;
-}
-
-.role-card {
-    background: #222;
-    border-radius: 20px;
-    padding: 35px 20px;
-    animation: fade .3s;
-}
-
-.role-card h1 {
-    font-size: 40px;
-    margin-bottom: 30px;
-}
-
-#timer {
-    display: none;
-    font-size: 70px;
-    font-weight: bold;
-    color: #ff4747;
-    margin-top: 40px;
-}
-
-#voiceText {
-    margin-top: 35px;
-    font-size: 28px;
-    line-height: 1.5;
-    font-weight: bold;
-}
-
-#sheriffBox {
-    display: none;
-    margin-top: 30px;
-    padding: 20px;
-    background: #f5d142;
-    color: #000;
-    border-radius: 15px;
-    font-size: 24px;
-    font-weight: bold;
-}
 
 #players {
+
     list-style: none;
-    margin-top: 20px;
+
+    padding: 0;
+
 }
+
+
 
 #players li {
-    background: #222;
-    margin-bottom: 10px;
-    padding: 15px;
+
+    background: #333;
+
+    margin: 8px;
+
+    padding: 12px;
+
     border-radius: 10px;
+
     font-size: 20px;
+
 }
 
-.ready {
-    border-left: 6px solid #32d74b;
+
+
+
+/* ======================
+   Роль
+====================== */
+
+
+.role-card {
+
+    background: #800000;
+
+    padding: 30px;
+
+    border-radius: 20px;
+
+    margin: 20px 0;
+
 }
 
-.not-ready {
-    border-left: 6px solid #ff453a;
+
+
+.role-card h1 {
+
+    font-size: 50px;
+
+    margin: 20px;
+
 }
 
-.hidden {
-    display: none !important;
+
+
+.role-card button {
+
+    background: green;
+
+    font-size: 25px;
+
 }
 
-@keyframes fade {
-    from {
-        opacity: 0;
-        transform: scale(.95);
+
+
+
+
+/* ======================
+   Действия
+====================== */
+
+
+#actionBox {
+
+    margin-top: 20px;
+
+}
+
+
+
+#actionBox button {
+
+    width: 70px;
+
+    height: 70px;
+
+    font-size: 30px;
+
+    background: #0055aa;
+
+}
+
+
+
+
+#actionBox h2 {
+
+    font-size: 35px;
+
+    padding: 20px;
+
+    background: #333;
+
+    border-radius: 15px;
+
+}
+
+
+
+
+
+/* ======================
+   Голос
+====================== */
+
+
+#voiceText {
+
+    margin-top: 25px;
+
+    font-size: 25px;
+
+    min-height: 40px;
+
+    color: #ddd;
+
+}
+
+
+
+
+/* ======================
+   Таймер
+====================== */
+
+
+#timer {
+
+    margin-top: 20px;
+
+    font-size: 45px;
+
+    font-weight: bold;
+
+    color: yellow;
+
+}
+
+
+
+
+
+/* ======================
+   Мертвый игрок
+====================== */
+
+
+.dead {
+
+    background: darkred;
+
+    padding: 25px;
+
+    border-radius: 20px;
+
+    font-size: 35px;
+
+}
+
+
+
+
+
+/* ======================
+   Телефон
+====================== */
+
+
+@media(max-width:600px){
+
+
+    body {
+
+        padding: 10px;
+
     }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
 
-@media (max-width: 600px) {
-
-    #login,
-    #game,
-    #adminPanel {
-        padding: 20px;
-    }
 
     h1 {
-        font-size: 34px;
+
+        font-size: 32px;
+
     }
 
-    .role-card h1 {
-        font-size: 34px;
-    }
-
-    #timer {
-        font-size: 60px;
-    }
-
-    #voiceText {
-        font-size: 24px;
-    }
 
     button {
-        font-size: 18px;
+
+        width: 90%;
+
+        font-size: 22px;
+
     }
 
-    input {
-        font-size: 18px;
+
+    #actionBox button {
+
+        width: 65px;
+
+        height: 65px;
+
+        margin: 5px;
+
     }
+
+
+    .role-card h1 {
+
+        font-size: 40px;
+
+    }
+
+
 }

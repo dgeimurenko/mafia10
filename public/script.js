@@ -1,239 +1,670 @@
 const socket = io();
 
-const params = new URLSearchParams(window.location.search);
+
+// ======================
+// Проверка админа
+// ======================
+
+const params = new URLSearchParams(
+    window.location.search
+);
+
 const isAdmin = params.get("admin") === "true";
+
+
+// ======================
+// Элементы
+// ======================
 
 const login = document.getElementById("login");
 const game = document.getElementById("game");
 const adminPanel = document.getElementById("adminPanel");
 
+const nameInput = document.getElementById("name");
 const joinBtn = document.getElementById("join");
+
 const startBtn = document.getElementById("startGame");
+const nightBtn = document.getElementById("startNight");
 const endBtn = document.getElementById("endGame");
 
-const nameInput = document.getElementById("name");
+const playersList = document.getElementById("players");
 
 const roleBox = document.getElementById("roleBox");
-const timer = document.getElementById("timer");
-const sheriffBox = document.getElementById("sheriffBox");
+
+const actionBox = document.getElementById("actionBox");
+
 const voiceText = document.getElementById("voiceText");
-const playersList = document.getElementById("players");
+
 const playerName = document.getElementById("playerName");
 
-let myName = "";
+const timer = document.getElementById("timer");
 
-if (isAdmin) {
-    login.style.display = "none";
-    game.style.display = "none";
-    adminPanel.style.display = "block";
 
-    endBtn.onclick = () => {
 
-        if(confirm("Закончить игру?")){
+let currentName = "";
 
-            socket.emit("endGame");
 
-        }
 
-    };
+// ======================
+// Админ
+// ======================
 
-} else {
-    adminPanel.style.display = "none";
-}
+if(isAdmin){
 
-joinBtn.onclick = () => {
+    socket.emit(
+        "registerAdmin"
+    );
 
-    const name = nameInput.value.trim();
 
-    if (!name) {
-        alert("Введите ник");
-        return;
+    if(login)
+        login.style.display="none";
+
+
+    if(game)
+        game.style.display="none";
+
+
+    if(adminPanel)
+        adminPanel.style.display="block";
+
+
+
+    if(endBtn){
+
+        endBtn.onclick = ()=>{
+
+            if(confirm("Закончить игру?")){
+
+                socket.emit(
+                    "endGame"
+                );
+
+            }
+
+        };
+
     }
 
-    myName = name;
 
-    socket.emit("setName", {
-        name
-    });
+}
 
-    login.style.display = "none";
-    game.style.display = "block";
 
-    playerName.innerText = name;
+
+// ======================
+// Вход игрока
+// ======================
+
+if(joinBtn){
+
+joinBtn.onclick = ()=>{
+
+
+    const name =
+        nameInput.value.trim();
+
+
+
+    if(!name){
+
+        alert(
+            "Введите ник"
+        );
+
+        return;
+
+    }
+
+
+
+    currentName=name;
+
+
+
+    socket.emit(
+        "setName",
+        {
+            name
+        }
+    );
+
+
+
+    if(login)
+        login.style.display="none";
+
+
+    if(game)
+        game.style.display="block";
+
+
+    if(playerName)
+        playerName.innerText=name;
+
 
 };
 
-startBtn.onclick = () => {
-    socket.emit("startGame");
-};
+}
 
-socket.on("updatePlayers", players => {
 
-    if (!isAdmin) return;
 
-    playersList.innerHTML = "";
+// ======================
+// Админ: список игроков
+// ======================
 
-    players.forEach(player => {
+socket.on(
+"playersUpdate",
+players=>{
 
-        const li = document.createElement("li");
 
-        li.innerText = player.name;
+    if(!playersList)
+        return;
+
+
+
+    playersList.innerHTML="";
+
+
+
+    players.forEach(player=>{
+
+
+        const li =
+            document.createElement("li");
+
+
+        li.innerHTML=
+        `
+        ${player.slot}.
+        ${player.name}
+        ${player.alive ? "🟢":"💀"}
+        ${player.ready ? "✅":""}
+        `;
+
 
         playersList.appendChild(li);
 
+
     });
 
-});
-
-socket.on("showRole", role => {
-
-    roleBox.innerHTML = `
-        <div class="role-card">
-            <h1>${role}</h1>
-            <button id="acceptRole">
-                Принято
-            </button>
-        </div>
-    `;
-
-    document.getElementById("acceptRole").onclick = () => {
-
-        roleBox.innerHTML = "";
-
-        socket.emit("roleAccepted");
-
-    };
 
 });
 
-socket.on("voice", text => {
 
-    voiceText.innerText = text;
 
-    speechSynthesis.cancel();
+// ======================
+// Начать игру
+// ======================
 
-    const msg = new SpeechSynthesisUtterance(text);
+if(startBtn){
 
-    msg.lang = "ru-RU";
+startBtn.onclick=()=>{
 
-    msg.rate = 1;
+    socket.emit(
+        "startGame"
+    );
 
-    speechSynthesis.speak(msg);
-
-});
-
-// =======================
-// Таймер мафии
-// =======================
-
-let timerInterval = null;
-
-socket.on("mafiaTimer", (seconds) => {
-
-    timer.style.display = "block";
-
-    let time = seconds;
-
-    timer.innerHTML = formatTime(time);
-
-    clearInterval(timerInterval);
-
-    timerInterval = setInterval(() => {
-
-        time--;
-
-        timer.innerHTML = formatTime(time);
-
-        if (time <= 0) {
-
-            clearInterval(timerInterval);
-
-            timer.style.display = "none";
-
-        }
-
-    }, 1000);
-
-});
-
-function formatTime(sec) {
-
-    const m = Math.floor(sec / 60);
-    const s = sec % 60;
-
-    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+};
 
 }
 
 
-// =======================
+
+// ======================
+// Начало ночи
+// ======================
+
+if(nightBtn){
+
+nightBtn.onclick=()=>{
+
+    socket.emit(
+        "startNight"
+    );
+
+};
+
+}
+
+
+
+// ======================
+// Роль
+// ======================
+
+socket.on(
+"showRole",
+role=>{
+
+
+    if(!roleBox)
+        return;
+
+
+
+    roleBox.innerHTML=
+    `
+
+    <div class="role-card">
+
+        <h1>${role}</h1>
+
+        <button id="acceptRole">
+            Принято
+        </button>
+
+    </div>
+
+    `;
+
+
+
+    document
+    .getElementById("acceptRole")
+    .onclick=()=>{
+
+
+        roleBox.innerHTML="";
+
+
+        socket.emit(
+            "roleAccepted"
+        );
+
+
+    };
+
+
+});
+
+
+
+// ======================
+// Все приняли роли
+// ======================
+
+socket.on(
+"allRolesAccepted",
+()=>{
+
+
+    console.log(
+        "Все готовы"
+    );
+
+
+});
+
+
+
+// ======================
+// Голос
+// ======================
+
+socket.on(
+"voice",
+text=>{
+
+
+    if(voiceText)
+        voiceText.innerText=text;
+
+
+
+    speechSynthesis.cancel();
+
+
+    const msg =
+        new SpeechSynthesisUtterance(text);
+
+
+    msg.lang="ru-RU";
+
+
+    speechSynthesis.speak(msg);
+
+
+
+});
+
+
+
+
+// ======================
+// Дон - убийство
+// ======================
+
+socket.on(
+"donKill",
+()=>{
+
+
+    showButtons(
+        "donKill"
+    );
+
+
+});
+
+
+
+
+// ======================
+// Дон выбрал
+// ======================
+
+socket.on(
+"donKillResult",
+slot=>{
+
+
+    showMessage(
+        `Игрок номер ${slot} будет убит`,
+        "donKill"
+    );
+
+
+});
+
+
+
+// ======================
+// Дон проверка
+// ======================
+
+socket.on(
+"donCheck",
+()=>{
+
+
+    showButtons(
+        "donCheck"
+    );
+
+
+});
+
+
+
+socket.on(
+"donCheckResult",
+data=>{
+
+
+    if(data.sheriff){
+
+        showMessage(
+            "Шериф",
+            "red"
+        );
+
+    }
+    else{
+
+        showMessage(
+            "Не шериф",
+            "black"
+        );
+
+    }
+
+
+});
+
+
+
+
+// ======================
 // Шериф
-// =======================
+// ======================
 
-socket.on("showSheriff", () => {
-
-    sheriffBox.style.display = "block";
-
-});
-
-socket.on("hideSheriff", () => {
-
-    sheriffBox.style.display = "none";
-
-});
+socket.on(
+"sheriffAction",
+()=>{
 
 
-// =======================
-// Очистка интерфейса
-// =======================
+    showButtons(
+        "sheriffCheck"
+    );
 
-socket.on("gameFinished", () => {
-
-    roleBox.innerHTML = "";
-
-    sheriffBox.style.display = "none";
-
-    timer.style.display = "none";
-
-    voiceText.innerHTML = "";
 
 });
 
 
-// =======================
-// Переподключение
-// =======================
 
-socket.on("connect", () => {
+socket.on(
+"sheriffResult",
+data=>{
 
-    console.log("Соединение установлено");
+
+    if(data.mafia){
+
+        showMessage(
+            "МАФИЯ",
+            "red"
+        );
+
+    }
+    else{
+
+        showMessage(
+            "МИРНЫЙ",
+            "black"
+        );
+
+    }
+
 
 });
 
-socket.on("disconnect", () => {
 
-    voiceText.innerHTML = "Соединение потеряно...";
+
+
+// ======================
+// Кнопки игроков
+// ======================
+
+function showButtons(action){
+
+
+    if(!actionBox)
+        return;
+
+
+
+    actionBox.innerHTML="";
+
+
+
+    for(let i=1;i<=10;i++){
+
+
+        const btn =
+            document.createElement("button");
+
+
+        btn.innerText=i;
+
+
+
+        btn.onclick=()=>{
+
+
+            socket.emit(
+                action,
+                i
+            );
+
+
+            actionBox.innerHTML="";
+
+
+        };
+
+
+
+        actionBox.appendChild(btn);
+
+
+    }
+
+
+}
+
+
+
+// ======================
+// Сообщение
+// ======================
+
+function showMessage(text,color){
+
+
+    if(!actionBox)
+        return;
+
+
+
+    actionBox.innerHTML=
+    `
+
+    <h2 style="color:${color || "black"}">
+    ${text}
+    </h2>
+
+    <button id="okBtn">
+    Понятно
+    </button>
+
+    `;
+
+
+
+    document
+    .getElementById("okBtn")
+    .onclick=()=>{
+
+
+        actionBox.innerHTML="";
+
+
+    };
+
+
+}
+
+
+
+// ======================
+// Смерть
+// ======================
+
+socket.on(
+"youAreDead",
+()=>{
+
+
+    alert(
+        "Вы убиты этой ночью!"
+    );
+
 
 });
 
 
-// =======================
-// На всякий случай скрываем
-// лишние элементы
-// =======================
 
-timer.style.display = "none";
-sheriffBox.style.display = "none";
+// ======================
+// День
+// ======================
+
+socket.on(
+"dayResult",
+data=>{
 
 
-// =======================
-// Запрет Enter отправлять
-// пустое имя
-// =======================
+    console.log(
+        "Убит игрок:",
+        data.killed
+    );
 
-nameInput.addEventListener("keypress", e => {
 
-    if (e.key === "Enter") {
+});
+
+
+
+// ======================
+// Конец игры
+// ======================
+
+socket.on(
+"gameResults",
+results=>{
+
+
+    if(!isAdmin)
+        return;
+
+
+
+    playersList.innerHTML="";
+
+
+
+    results.forEach(player=>{
+
+
+        const li =
+            document.createElement("li");
+
+
+        li.innerHTML=
+        `
+        ${player.slot}.
+        ${player.name}
+        —
+        ${player.role}
+        `;
+
+
+
+        playersList.appendChild(li);
+
+
+    });
+
+
+});
+
+
+
+socket.on(
+"gameEnded",
+()=>{
+
+
+    roleBox.innerHTML="";
+
+
+    actionBox.innerHTML="";
+
+
+    voiceText.innerHTML="";
+
+
+});
+
+
+
+// ======================
+// Enter
+// ======================
+
+if(nameInput){
+
+nameInput.addEventListener(
+"keypress",
+e=>{
+
+    if(e.key==="Enter"){
 
         joinBtn.click();
 
@@ -241,36 +672,4 @@ nameInput.addEventListener("keypress", e => {
 
 });
 
-socket.on("gameEnded", ()=>{
-
-    roleBox.innerHTML = "";
-
-    timer.style.display="none";
-
-    sheriffBox.style.display="none";
-
-    voiceText.innerHTML="";
-
-});
-
-socket.on("gameResults", results=>{
-
-    if(!isAdmin) return;
-
-    playersList.innerHTML="";
-
-    results.forEach(player=>{
-
-        const li=document.createElement("li");
-
-        li.innerHTML=`
-            <b>${player.name}</b>
-            <br>
-            ${player.role}
-        `;
-
-        playersList.appendChild(li);
-
-    });
-
-});
+}

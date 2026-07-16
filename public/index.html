@@ -1,25 +1,37 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Мафия</title>
 
     <link rel="stylesheet" href="style.css">
 
-    <script src="/socket.io/socket.io.js"></script>
 </head>
+
+
 <body>
 
-<div id="login">
 
-    <h1>Мафия</h1>
+<h1>🎭 Мафия</h1>
 
-    <input
-        type="text"
+
+
+<!-- ======================
+     Вход игрока
+====================== -->
+
+<div id="login" class="box">
+
+    <h2>Введите ник</h2>
+
+    <input 
         id="name"
-        placeholder="Введите ник"
-        maxlength="20"
+        placeholder="Ваш ник"
     >
 
     <button id="join">
@@ -29,43 +41,93 @@
 </div>
 
 
-<div id="game" style="display:none;">
 
-    <h2 id="playerName"></h2>
+
+
+<!-- ======================
+     Игра игрока
+====================== -->
+
+<div id="game" class="box" style="display:none">
+
+
+    <h2>
+        Игрок:
+        <span id="playerName"></span>
+    </h2>
+
+
 
     <div id="roleBox"></div>
 
-    <div id="timer"></div>
 
-    <div id="sheriffBox" style="display:none;">
-        <h2>Вы можете осмотреть город</h2>
-    </div>
+
+    <div id="actionBox"></div>
+
+
 
     <div id="voiceText"></div>
+
+
+
+    <div id="timer"></div>
+
 
 </div>
 
 
-<div id="adminPanel" style="display:none;">
 
-    <h2>Администратор</h2>
+
+
+<!-- ======================
+     Админ
+====================== -->
+
+<div id="adminPanel" class="box" style="display:none">
+
+
+    <h2>
+        👑 Администратор
+    </h2>
+
+
 
     <button id="startGame">
         Начать игру
     </button>
 
-    <button id="endGame">
-      Закончить игру
-  </button>
 
-    <h3>Игроки</h3>
+    <button id="startNight">
+        Начало ночи
+    </button>
+
+
+    <button id="endGame">
+        Закончить игру
+    </button>
+
+
+
+    <h3>
+        Игроки:
+    </h3>
+
+
 
     <ul id="players"></ul>
+
 
 </div>
 
 
+
+
+
+<script src="/socket.io/socket.io.js"></script>
+
 <script src="script.js"></script>
 
+
 </body>
+
 </html>

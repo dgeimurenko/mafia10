@@ -8,7 +8,7 @@ const io = new Server(server);
 
 app.use(express.static("public"));
 
-const BASE_ROLES = [
+const ROLES = [
     "Шериф",
     "Дон Мафии",
     "Мафия",
@@ -22,224 +22,815 @@ const BASE_ROLES = [
 ];
 
 let players = [];
-let acceptedPlayers = 0;
+
+let adminId = null;
+
 let gameState = "waiting";
 
-function shuffle(arr) {
-    return [...arr].sort(() => Math.random() - 0.5);
+let acceptedPlayers = 0;
+
+let nightKill = null;
+
+let donCheckTarget = null;
+
+let sheriffCheckTarget = null;
+
+
+// ======================
+// Утилиты
+// ======================
+
+function shuffle(array) {
+    return [...array].sort(() => Math.random() - 0.5);
 }
+
 
 function voice(text) {
+
     io.emit("voice", text);
+
 }
 
-function broadcastPlayers() {
 
-    io.emit(
-        "updatePlayers",
-        players.map(p => ({
-            id: p.id,
-            name: p.name,
-            ready: p.accepted,
-            role: gameState === "waiting" ? null : p.role
+function getPlayerBySlot(slot) {
+
+    return players.find(
+        player => player.slot === Number(slot)
+    );
+
+}
+
+
+function getAlivePlayers() {
+
+    return players.filter(
+        player => player.alive
+    );
+
+}
+
+
+function sendPlayersToAdmin() {
+
+    if (!adminId) return;
+
+    io.to(adminId).emit(
+        "playersUpdate",
+        players.map(player => ({
+            slot: player.slot,
+            name: player.name,
+            alive: player.alive,
+            ready: player.accepted
         }))
     );
 
 }
 
+
 function assignRoles() {
 
-    let roles = BASE_ROLES.slice(0, players.length);
+    let roles = shuffle(
+        ROLES.slice(0, players.length)
+    );
 
-    while (roles.length < players.length) {
-        roles.push("Мирный");
-    }
-
-    roles = shuffle(roles);
 
     players.forEach((player, index) => {
 
         player.role = roles[index];
         player.accepted = false;
+        player.alive = true;
 
     });
 
 }
+
+
 
 function sendRoles() {
 
     players.forEach(player => {
 
-        io.to(player.id).emit("showRole", player.role);
+        io.to(player.id).emit(
+            "showRole",
+            player.role
+        );
 
     });
 
 }
+
+// ======================
+// Логика ночи
+// ======================
 
 function startNight() {
 
-    gameState = "mafia";
 
-    voice("Просыпается мафия. У мафии одна минута на договорку начинается сейчас.");
+    gameState = "night";
 
-    players.forEach(player => {
 
-        if (player.role === "Мафия" || player.role === "Дон Мафии") {
-            io.to(player.id).emit("mafiaTimer", 80);
-        }
+    voice(
+        "Наступает ночь. Город засыпает."
+    );
 
-    });
 
-    setTimeout(endMafia, 80000);
-
-}
-
-function endMafia() {
-
-    voice("Договорка окончена. Засыпайте.");
-
-    setTimeout(startSheriff, 10000);
-
-}
-
-function startSheriff() {
-
-    gameState = "sheriff";
-
-    voice("Шериф может осмотреть город.");
-
-    const sheriff = players.find(p => p.role === "Шериф");
-
-    if (sheriff) {
-        io.to(sheriff.id).emit("showSheriff");
-    }
-
-    setTimeout(endSheriff, 10000);
-
-}
-
-function endSheriff() {
-
-    const sheriff = players.find(p => p.role === "Шериф");
-
-    if (sheriff) {
-        io.to(sheriff.id).emit("hideSheriff");
-    }
-
-    voice("Шериф засыпает.");
 
     setTimeout(() => {
 
-        gameState = "day";
 
-        voice("Город просыпается.");
+        gameState = "donKill";
 
-    }, 10000);
+
+        voice(
+            "Просыпается дон и выбирает кого убивает."
+        );
+
+
+
+        const don = players.find(
+            p =>
+            p.role === "Дон Мафии" &&
+            p.alive
+        );
+
+
+
+        if (don) {
+
+            io.to(don.id).emit(
+                "donKill"
+            );
+
+        }
+
+
+
+    },10000);
+
+
 
 }
+
+
+
+
+function startSheriff() {
+
+
+    gameState = "sheriff";
+
+
+    voice(
+        "Просыпается шериф и ищет мафию."
+    );
+
+
+
+    const sheriff = players.find(
+        p =>
+        p.role === "Шериф" &&
+        p.alive
+    );
+
+
+
+    if (sheriff) {
+
+        io.to(sheriff.id).emit(
+            "sheriffAction"
+        );
+
+    }
+
+
+}
+
+// ======================
+// Socket.IO
+// ======================
 
 io.on("connection", socket => {
 
     console.log("Подключился:", socket.id);
 
-    socket.on("setName", data => {
 
-        // Не даём зарегистрироваться дважды
-        if (players.find(p => p.id === socket.id)) return;
+    // ======================
+    // Регистрация администратора
+    // ======================
 
-        players.push({
-            id: socket.id,
-            name: data.name,
-            role: null,
-            accepted: false
-        });
+    socket.on("registerAdmin", () => {
 
-        broadcastPlayers();
+        adminId = socket.id;
+
+        console.log(
+            "Администратор:",
+            adminId
+        );
+
+        sendPlayersToAdmin();
 
     });
+
+
+
+    // ======================
+    // Игрок вводит имя
+    // ======================
+
+    socket.on("setName", data => {
+
+
+        if (!data.name) return;
+
+
+        // защита от повторного входа
+        if (
+            players.find(
+                p => p.id === socket.id
+            )
+        ) {
+            return;
+        }
+
+
+
+        players.push({
+
+            id: socket.id,
+
+            name: data.name,
+
+            slot: players.length + 1,
+
+            role: null,
+
+            accepted: false,
+
+            alive: true
+
+        });
+
+
+
+        console.log(
+            "Игрок:",
+            data.name
+        );
+
+
+        sendPlayersToAdmin();
+
+
+    });
+
+
+
+    // ======================
+    // Начать игру
+    // ======================
 
     socket.on("startGame", () => {
 
-        if (gameState !== "waiting") return;
 
-        if (players.length < 2) return;
+        if (socket.id !== adminId) {
+            return;
+        }
 
-        acceptedPlayers = 0;
+
+        if (gameState !== "waiting") {
+            return;
+        }
+
+
+        if (players.length < 2) {
+
+            io.to(adminId).emit(
+                "errorMessage",
+                "Нужно минимум 2 игрока"
+            );
+
+            return;
+
+        }
+
+
 
         assignRoles();
 
-        sendRoles();
+
+        acceptedPlayers = 0;
+
 
         gameState = "roles";
 
-        broadcastPlayers();
+
+        sendRoles();
+
+
+        sendPlayersToAdmin();
+
+
 
     });
+
+
+
+    // ======================
+    // Игрок принял роль
+    // ======================
 
     socket.on("roleAccepted", () => {
 
-        const player = players.find(p => p.id === socket.id);
+
+        let player = players.find(
+            p => p.id === socket.id
+        );
+
 
         if (!player) return;
 
+
         if (player.accepted) return;
+
+
 
         player.accepted = true;
 
+
         acceptedPlayers++;
 
-        broadcastPlayers();
 
-        if (acceptedPlayers >= players.length) {
-            startNight();
+        sendPlayersToAdmin();
+
+
+
+        if (
+            acceptedPlayers === players.length
+        ) {
+
+
+            io.emit(
+                "allRolesAccepted"
+            );
+
+
         }
 
-    });
-
-    socket.on("disconnect", () => {
-
-        console.log("Отключился:", socket.id);
-
-        players = players.filter(p => p.id !== socket.id);
-
-        broadcastPlayers();
 
     });
 
-    socket.on("endGame", () => {
 
-    endGame();
+// ======================
+// Начало ночи
+// ======================
+
+socket.on("startNight", () => {
+
+
+    if (socket.id !== adminId) {
+        return;
+    }
+
+
+    if (gameState !== "roles") {
+        return;
+    }
+
+
+    startNight();
+
 
 });
 
+
+
+// ======================
+// Дон выбирает жертву
+// ======================
+
+socket.on("donKill", slot => {
+
+
+    if (gameState !== "donKill") {
+        return;
+    }
+
+
+    const player = players.find(
+        p => p.id === socket.id
+    );
+
+
+    if (!player) return;
+
+
+    if (
+        player.role !== "Дон Мафии"
+    ) {
+        return;
+    }
+
+
+
+    const target = getPlayerBySlot(slot);
+
+
+    if (!target) return;
+
+
+
+    nightKill = target.slot;
+
+
+
+    io.to(player.id).emit(
+        "donKillResult",
+        target.slot
+    );
+
+
+
+    gameState = "donCheck";
+
+
+
+    setTimeout(() => {
+
+        voice(
+            "Дон проверяет игрока на шерифство."
+        );
+
+
+        io.to(player.id).emit(
+            "donCheck"
+        );
+
+
+    }, 2000);
+
+
+
 });
 
-function endGame() {
 
-    // Показываем админу роли
-    io.emit("gameResults", players.map(player => ({
-        name: player.name,
-        role: player.role
-    })));
 
-    // Очищаем игроков
-    players.forEach(player => {
-        player.role = null;
-        player.accepted = false;
-    });
+// ======================
+// Дон проверяет шерифа
+// ======================
 
-    acceptedPlayers = 0;
-    gameState = "waiting";
+socket.on("donCheck", slot => {
 
-    // Всем игрокам
-    io.emit("gameEnded");
 
-    broadcastPlayers();
+    if (gameState !== "donCheck") {
+        return;
+    }
+
+
+
+    const player = players.find(
+        p => p.id === socket.id
+    );
+
+
+    if (!player) return;
+
+
+    if (
+        player.role !== "Дон Мафии"
+    ) {
+        return;
+    }
+
+
+
+    const target = getPlayerBySlot(slot);
+
+
+    if (!target) return;
+
+
+
+    const result =
+        target.role === "Шериф";
+
+
+
+    io.to(player.id).emit(
+        "donCheckResult",
+        {
+            sheriff: result
+        }
+    );
+
+
+
+    gameState = "sheriff";
+
+
+
+    setTimeout(() => {
+
+
+        voice(
+            "Дон засыпает."
+        );
+
+
+        setTimeout(() => {
+
+
+            startSheriff();
+
+
+        },10000);
+
+
+
+    },3000);
+
+
+
+});
+
+
+
+
+// ======================
+// Шериф проверяет игрока
+// ======================
+
+socket.on("sheriffCheck", slot => {
+
+
+    if (gameState !== "sheriff") {
+        return;
+    }
+
+
+
+    const player = players.find(
+        p => p.id === socket.id
+    );
+
+
+    if (!player) return;
+
+
+
+    if (
+        player.role !== "Шериф"
+    ) {
+        return;
+    }
+
+
+
+    const target = getPlayerBySlot(slot);
+
+
+    if (!target) return;
+
+
+
+    const mafia =
+        target.role === "Мафия" ||
+        target.role === "Дон Мафии";
+
+
+
+    io.to(player.id).emit(
+        "sheriffResult",
+        {
+            mafia
+        }
+    );
+
+    setTimeout(() => {
+
+    voice(
+        "Шериф засыпает."
+    );
+
+
+    setTimeout(() => {
+
+        startDay();
+
+    },10000);
+
+
+},3000);
+
+});
+
+// ======================
+// Завершение проверки шерифа
+// ======================
+
+socket.on("sheriffFinished", () => {
+
+
+    if (socket.id !== adminId) {
+        return;
+    }
+
+
+    startDay();
+
+
+});
+
+
+
+// ======================
+// День
+// ======================
+
+function startDay() {
+
+
+    gameState = "day";
+
+
+    const killed = getPlayerBySlot(
+        nightKill
+    );
+
+
+    if (killed) {
+
+
+        killed.alive = false;
+
+
+        io.to(killed.id).emit(
+            "youAreDead"
+        );
+
+
+    }
+
+
+
+    voice(
+        `Город просыпается. Сегодня был убит игрок номер ${nightKill}.`
+    );
+
+
+
+    io.emit(
+        "dayResult",
+        {
+            killed: nightKill
+        }
+    );
+
+
+
+    sendPlayersToAdmin();
+
+
+    nightKill = null;
+
 
 }
 
+
+
+// ======================
+// Завершение игры
+// ======================
+
+socket.on("endGame", () => {
+
+
+    if (socket.id !== adminId) {
+        return;
+    }
+
+
+
+    finishGame();
+
+
+
+});
+
+
+
+function finishGame() {
+
+
+    gameState = "finished";
+
+
+
+    const result =
+        players.map(player => ({
+
+            slot: player.slot,
+
+            name: player.name,
+
+            role: player.role
+
+        }));
+
+
+
+    if (adminId) {
+
+
+        io.to(adminId).emit(
+            "gameResults",
+            result
+        );
+
+
+    }
+
+
+
+    players.forEach(player => {
+
+
+        player.role = null;
+
+        player.accepted = false;
+
+        player.alive = true;
+
+
+    });
+
+
+
+    acceptedPlayers = 0;
+
+    nightKill = null;
+
+
+    gameState = "waiting";
+
+
+
+    io.emit(
+        "gameEnded"
+    );
+
+
+
+    sendPlayersToAdmin();
+
+
+}
+
+
+
+// ======================
+// Отключение игрока
+// ======================
+
+socket.on("disconnect", () => {
+
+
+    console.log(
+        "Отключился:",
+        socket.id
+    );
+
+
+
+    if (socket.id === adminId) {
+
+        adminId = null;
+
+    }
+
+
+
+    players =
+        players.filter(
+            player =>
+            player.id !== socket.id
+        );
+
+
+
+    sendPlayersToAdmin();
+
+
+
+});
+
+
+
+});
+
 server.listen(3000, () => {
 
-    console.log("Сервер запущен: http://localhost:3000");
+    console.log(
+        "Сервер запущен: http://localhost:3000"
+    );
 
 });
