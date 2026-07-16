@@ -244,59 +244,6 @@ function startSheriffPhase(){
 
 }
 
-// ======================
-// Логика ночи
-// ======================
-
-function startNight() {
-
-
-    gameState = "night";
-
-
-    voice(
-        "Наступает ночь. Город засыпает."
-    );
-
-
-
-    setTimeout(() => {
-
-
-        gameState = "donKill";
-
-
-        voice(
-            "Просыпается дон и выбирает кого убивает."
-        );
-
-
-
-        const don = players.find(
-            p =>
-            p.role === "Дон Мафии" &&
-            p.alive
-        );
-
-
-
-        if (don) {
-
-            io.to(don.id).emit(
-                "donKill"
-            );
-
-        }
-
-
-
-    },10000);
-
-
-
-}
-
-
 
 
 function startSheriff() {
@@ -557,7 +504,7 @@ socket.on("startNight", () => {
 
 
 
-    startNight();
+    startMafiaPhase();
 
 
 });
