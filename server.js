@@ -14,7 +14,6 @@ const roles = [
 
 // Игроки
 let players = [];
-
 let gameStarted = false;
 let gameInProgress = false;
 
