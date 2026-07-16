@@ -526,14 +526,35 @@ io.on("connection", socket => {
 socket.on("startNight", () => {
 
 
+    console.log(
+        "Админ нажал начало ночи",
+        gameState
+    );
+
+
     if (socket.id !== adminId) {
+
+        console.log("Не админ");
+
         return;
     }
 
 
-    if (gameState !== "roles") {
+
+    if (
+        gameState !== "roles" &&
+        gameState !== "ready"
+    ) {
+
+        console.log(
+            "Нельзя начать ночь. Состояние:",
+            gameState
+        );
+
         return;
+
     }
+
 
 
     startNight();
