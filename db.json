@@ -1,0 +1,138 @@
+{
+  "games": [
+    {
+      "id": 1777217551232,
+      "date": "2026-04-04",
+      "gameNumber": "1",
+      "players": [
+        {
+          "name": "Авилес",
+          "role": "mafia"
+        },
+        {
+          "name": "Гордон",
+          "role": "mafia"
+        },
+        {
+          "name": "Пауэрбанк",
+          "role": "don"
+        },
+        {
+          "name": "Дождь",
+          "role": "sheriff"
+        },
+        {
+          "name": "Гринч",
+          "role": "civilian"
+        },
+        {
+          "name": "Гросс",
+          "role": "civilian"
+        },
+        {
+          "name": "Касас",
+          "role": "civilian"
+        },
+        {
+          "name": "Зима",
+          "role": "civilian"
+        },
+        {
+          "name": "Че_бурек",
+          "role": "civilian"
+        },
+        {
+          "name": "Йойо",
+          "role": "civilian"
+        }
+      ],
+      "extra": {
+        "pu": "",
+        "lh": "",
+        "winner": "мафия",
+        "mafiaWin": "",
+        "guess": "нет",
+        "lieSheriff": ""
+      },
+      "points": {
+        "Авилес": 1.3,
+        "Гордон": 1.3,
+        "Пауэрбанк": 1.3,
+        "Дождь": 0.3,
+        "Гринч": 0.3,
+        "Гросс": 0.3,
+        "Касас": 0.3,
+        "Зима": 0.3,
+        "Че_бурек": 0.3,
+        "Йойо": 0.3
+      }
+    },
+    {
+      "id": 1777217923654,
+      "date": "2026-04-04",
+      "gameNumber": "1",
+      "players": [
+        {
+          "name": "Авилес",
+          "role": "mafia"
+        },
+        {
+          "name": "Гордон",
+          "role": "mafia"
+        },
+        {
+          "name": "Пауэрбанк",
+          "role": "don"
+        },
+        {
+          "name": "Голден",
+          "role": "sheriff"
+        },
+        {
+          "name": "Гринч",
+          "role": "civilian"
+        },
+        {
+          "name": "Гросс",
+          "role": "civilian"
+        },
+        {
+          "name": "Зима",
+          "role": "civilian"
+        },
+        {
+          "name": "Изи",
+          "role": "civilian"
+        },
+        {
+          "name": "Че_бурек",
+          "role": "civilian"
+        },
+        {
+          "name": "Йойо",
+          "role": "civilian"
+        }
+      ],
+      "extra": {
+        "pu": "",
+        "lh": "",
+        "winner": "мафия",
+        "mafiaWin": "",
+        "guess": "нет",
+        "lieSheriff": ""
+      },
+      "points": {
+        "Авилес": 1.3,
+        "Гордон": 1.3,
+        "Пауэрбанк": 1.3,
+        "Голден": 0.3,
+        "Гринч": 0.3,
+        "Гросс": 0.3,
+        "Зима": 0.3,
+        "Изи": 0.3,
+        "Че_бурек": 0.3,
+        "Йойо": 0.3
+      }
+    }
+  ]
+}

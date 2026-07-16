@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Мафия</title>
+  <style>
+    #role {
+      display: none;
+      font-size: 20px;
+      color: white;
+      background-color: black;
+      padding: 10px;
+      margin-top: 20px;
+    }
+    #playerList {
+      list-style-type: none;
+      padding: 0;
+    }
+    #playerList li {
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Мафия</h1>
+  
+  <div id="playerInfo">
+    <label for="name">Введите имя:</label>
+    <input type="text" id="name" placeholder="Ваше имя">
+    <button id="setName">Подтвердить</button>
+  </div>
+
+  <div id="gameControls" style="display:none;">
+    <button id="startGame">Начать игру</button>
+  </div>
+
+  <div id="gameMessages"></div>
+  <div id="role"></div>
+  
+  <h2>Игроки в игре:</h2>
+  <ul id="playerList"></ul>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    let playerName = '';
+    let playerSlot = 0;
+
+    document.getElementById('setName').onclick = () => {
+      playerName = document.getElementById('name').value;
+      playerSlot = Math.floor(Math.random() * 10) + 1; // Присваиваем случайный слот (1-10)
+      socket.emit('setName', { name: playerName, slot: playerSlot });
+      document.getElementById('playerInfo').style.display = 'none';
+      document.getElementById('gameControls').style.display = 'block';
+    };
+
+    document.getElementById('startGame').onclick = () => {
+      socket.emit('startGame');
+    };
+
+    socket.on('updatePlayerList', (players) => {
+      const playerList = document.getElementById('playerList');
+      playerList.innerHTML = '';  // Очищаем список
+
+      players.forEach(player => {
+        const li = document.createElement('li');
+        li.textContent = `Игрок ${player.slot}: ${player.name}`;
+        playerList.appendChild(li);
+      });
+    });
+
+    socket.on('gameStart', (message) => {
+      const gameMessages = document.getElementById('gameMessages');
+      const p = document.createElement('p');
+      p.textContent = message;
+      gameMessages.appendChild(p);
+
+      // Озвучивание
+      const msg = new SpeechSynthesisUtterance(message);
+      window.speechSynthesis.speak(msg);
+    });
+
+    socket.on('showRole', (role) => {
+      const roleDiv = document.getElementById('role');
+      roleDiv.innerHTML = `Ваша роль: ${role}`;
+      roleDiv.style.display = 'block';
+    });
+  </script>
+</body>
+</html>

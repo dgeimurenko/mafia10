@@ -1,0 +1,178 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #111;
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#login,
+#game,
+#adminPanel {
+    width: 100%;
+    max-width: 420px;
+    padding: 25px;
+    text-align: center;
+}
+
+h1 {
+    margin-bottom: 25px;
+    font-size: 42px;
+}
+
+h2 {
+    margin-bottom: 20px;
+}
+
+h3 {
+    margin: 20px 0 10px;
+}
+
+input {
+    width: 100%;
+    padding: 15px;
+    font-size: 20px;
+    border: none;
+    border-radius: 12px;
+    outline: none;
+    margin-bottom: 20px;
+}
+
+button {
+    width: 100%;
+    padding: 15px;
+    font-size: 20px;
+    border: none;
+    border-radius: 12px;
+    background: #2d7dff;
+    color: white;
+    cursor: pointer;
+    transition: .2s;
+}
+
+button:hover {
+    background: #1d65d8;
+}
+
+button:active {
+    transform: scale(.98);
+}
+
+#roleBox {
+    margin-top: 30px;
+}
+
+.role-card {
+    background: #222;
+    border-radius: 20px;
+    padding: 35px 20px;
+    animation: fade .3s;
+}
+
+.role-card h1 {
+    font-size: 40px;
+    margin-bottom: 30px;
+}
+
+#timer {
+    display: none;
+    font-size: 70px;
+    font-weight: bold;
+    color: #ff4747;
+    margin-top: 40px;
+}
+
+#voiceText {
+    margin-top: 35px;
+    font-size: 28px;
+    line-height: 1.5;
+    font-weight: bold;
+}
+
+#sheriffBox {
+    display: none;
+    margin-top: 30px;
+    padding: 20px;
+    background: #f5d142;
+    color: #000;
+    border-radius: 15px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+#players {
+    list-style: none;
+    margin-top: 20px;
+}
+
+#players li {
+    background: #222;
+    margin-bottom: 10px;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 20px;
+}
+
+.ready {
+    border-left: 6px solid #32d74b;
+}
+
+.not-ready {
+    border-left: 6px solid #ff453a;
+}
+
+.hidden {
+    display: none !important;
+}
+
+@keyframes fade {
+    from {
+        opacity: 0;
+        transform: scale(.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@media (max-width: 600px) {
+
+    #login,
+    #game,
+    #adminPanel {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 34px;
+    }
+
+    .role-card h1 {
+        font-size: 34px;
+    }
+
+    #timer {
+        font-size: 60px;
+    }
+
+    #voiceText {
+        font-size: 24px;
+    }
+
+    button {
+        font-size: 18px;
+    }
+
+    input {
+        font-size: 18px;
+    }
+}

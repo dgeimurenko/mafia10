@@ -1,0 +1,12 @@
+diff a/server.js b/server.js	(rejected hunks)
+@@ -14,7 +14,10 @@
+  
+  // Игроки
+  let players = [];
+++<<<<<<< HEAD
+ +
+++=======
+++>>>>>>> parent of 013623e... mafia10 to FEVE mafia stats
+  let gameStarted = false;
+  let gameInProgress = false;
+  
