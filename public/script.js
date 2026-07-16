@@ -595,41 +595,23 @@ data=>{
 // Конец игры
 // ======================
 
-socket.on(
-"gameResults",
-results=>{
+socket.on("gameResults", results => {
+
+    if(!isAdmin) return;
 
 
-    if(!isAdmin)
-        return;
+    let text = "🎭 Результаты игры:\n\n";
 
 
+    results.forEach(player => {
 
-    playersList.innerHTML="";
-
-
-
-    results.forEach(player=>{
-
-
-        const li =
-            document.createElement("li");
-
-
-        li.innerHTML=
-        `
-        ${player.slot}.
-        ${player.name}
-        —
-        ${player.role}
-        `;
-
-
-
-        playersList.appendChild(li);
-
+        text += 
+        `${player.slot}. ${player.name} — ${player.role}\n`;
 
     });
+
+
+    alert(text);
 
 
 });
