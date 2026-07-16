@@ -1,92 +1,67 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Мафия</title>
-  <style>
-    #role {
-      display: none;
-      font-size: 20px;
-      color: white;
-      background-color: black;
-      padding: 10px;
-      margin-top: 20px;
-    }
-    #playerList {
-      list-style-type: none;
-      padding: 0;
-    }
-    #playerList li {
-      margin: 10px 0;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мафия</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-  <h1>Мафия</h1>
-  
-  <div id="playerInfo">
-    <label for="name">Введите имя:</label>
-    <input type="text" id="name" placeholder="Ваше имя">
-    <button id="setName">Подтвердить</button>
-  </div>
 
-  <div id="gameControls" style="display:none;">
-    <button id="startGame">Начать игру</button>
-  </div>
+<div id="login">
 
-  <div id="gameMessages"></div>
-  <div id="role"></div>
-  
-  <h2>Игроки в игре:</h2>
-  <ul id="playerList"></ul>
+    <h1>Мафия</h1>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-    const socket = io();
+    <input
+        type="text"
+        id="name"
+        placeholder="Введите ник"
+        maxlength="20"
+    >
 
-    let playerName = '';
-    let playerSlot = 0;
+    <button id="join">
+        Войти
+    </button>
 
-    document.getElementById('setName').onclick = () => {
-      playerName = document.getElementById('name').value;
-      playerSlot = Math.floor(Math.random() * 10) + 1; // Присваиваем случайный слот (1-10)
-      socket.emit('setName', { name: playerName, slot: playerSlot });
-      document.getElementById('playerInfo').style.display = 'none';
-      document.getElementById('gameControls').style.display = 'block';
-    };
+</div>
 
-    document.getElementById('startGame').onclick = () => {
-      socket.emit('startGame');
-    };
 
-    socket.on('updatePlayerList', (players) => {
-      const playerList = document.getElementById('playerList');
-      playerList.innerHTML = '';  // Очищаем список
+<div id="game" style="display:none;">
 
-      players.forEach(player => {
-        const li = document.createElement('li');
-        li.textContent = `Игрок ${player.slot}: ${player.name}`;
-        playerList.appendChild(li);
-      });
-    });
+    <h2 id="playerName"></h2>
 
-    socket.on('gameStart', (message) => {
-      const gameMessages = document.getElementById('gameMessages');
-      const p = document.createElement('p');
-      p.textContent = message;
-      gameMessages.appendChild(p);
+    <div id="roleBox"></div>
 
-      // Озвучивание
-      const msg = new SpeechSynthesisUtterance(message);
-      window.speechSynthesis.speak(msg);
-    });
+    <div id="timer"></div>
 
-    socket.on('showRole', (role) => {
-      const roleDiv = document.getElementById('role');
-      roleDiv.innerHTML = `Ваша роль: ${role}`;
-      roleDiv.style.display = 'block';
-    });
-  </script>
+    <div id="sheriffBox" style="display:none;">
+        <h2>Вы можете осмотреть город</h2>
+    </div>
+
+    <div id="voiceText"></div>
+
+</div>
+
+
+<div id="adminPanel" style="display:none;">
+
+    <h2>Администратор</h2>
+
+    <button id="startGame">
+        Начать игру
+    </button>
+
+    <h3>Игроки</h3>
+
+    <ul id="players"></ul>
+
+</div>
+
+
+<script src="script.js"></script>
+
 </body>
 </html>
