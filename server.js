@@ -85,12 +85,12 @@ function startNight() {
     players.forEach(player => {
 
         if (player.role === "Мафия" || player.role === "Дон Мафии") {
-            io.to(player.id).emit("mafiaTimer", 60);
+            io.to(player.id).emit("mafiaTimer", 80);
         }
 
     });
 
-    setTimeout(endMafia, 60000);
+    setTimeout(endMafia, 80000);
 
 }
 
@@ -206,7 +206,37 @@ io.on("connection", socket => {
 
     });
 
+    socket.on("endGame", () => {
+
+    endGame();
+
 });
+
+});
+
+function endGame() {
+
+    // Показываем админу роли
+    io.emit("gameResults", players.map(player => ({
+        name: player.name,
+        role: player.role
+    })));
+
+    // Очищаем игроков
+    players.forEach(player => {
+        player.role = null;
+        player.accepted = false;
+    });
+
+    acceptedPlayers = 0;
+    gameState = "waiting";
+
+    // Всем игрокам
+    io.emit("gameEnded");
+
+    broadcastPlayers();
+
+}
 
 server.listen(3000, () => {
 

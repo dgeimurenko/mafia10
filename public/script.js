@@ -9,6 +9,7 @@ const adminPanel = document.getElementById("adminPanel");
 
 const joinBtn = document.getElementById("join");
 const startBtn = document.getElementById("startGame");
+const endBtn = document.getElementById("endGame");
 
 const nameInput = document.getElementById("name");
 
@@ -25,6 +26,17 @@ if (isAdmin) {
     login.style.display = "none";
     game.style.display = "none";
     adminPanel.style.display = "block";
+
+    endBtn.onclick = () => {
+
+        if(confirm("Закончить игру?")){
+
+            socket.emit("endGame");
+
+        }
+
+    };
+
 } else {
     adminPanel.style.display = "none";
 }
@@ -226,5 +238,39 @@ nameInput.addEventListener("keypress", e => {
         joinBtn.click();
 
     }
+
+});
+
+socket.on("gameEnded", ()=>{
+
+    roleBox.innerHTML = "";
+
+    timer.style.display="none";
+
+    sheriffBox.style.display="none";
+
+    voiceText.innerHTML="";
+
+});
+
+socket.on("gameResults", results=>{
+
+    if(!isAdmin) return;
+
+    playersList.innerHTML="";
+
+    results.forEach(player=>{
+
+        const li=document.createElement("li");
+
+        li.innerHTML=`
+            <b>${player.name}</b>
+            <br>
+            ${player.role}
+        `;
+
+        playersList.appendChild(li);
+
+    });
 
 });
