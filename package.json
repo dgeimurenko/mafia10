@@ -1,11 +1,13 @@
 {
-  "name": "mafia-stats-service",
+  "name": "online-users-game",
   "version": "1.0.0",
+  "description": "Real-time user list with admin-controlled game start",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.22.1"
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2"
   }
 }
