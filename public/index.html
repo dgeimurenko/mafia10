@@ -114,6 +114,19 @@
     ▶ Музыка
 </button>
 
+<button id="nextTrackBtn">⏭ Следующий трек</button>
+
+<label>
+    🔊
+    <input
+        id="volumeSlider"
+        type="range"
+        min="0"
+        max="100"
+        value="20">
+</label>
+
+
 
 
     <h3>
@@ -129,8 +142,7 @@
 
 
 
-<audio id="bgMusic" loop>
-    <source src="music/background.m4a" type="audio/mp4">
+<audio id="bgMusic">
 </audio>
 
 <script src="/socket.io/socket.io.js"></script>
