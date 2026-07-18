@@ -68,27 +68,34 @@ function playCurrentTrack(){
 
     bgMusic.play().catch(()=>{});
 
+    musicBtn.textContent = "⏸ Музыка";
+
 }
 
 if(musicBtn){
 
-    musicBtn.onclick = async ()=>{
+    musicBtn.onclick = async () => {
 
-        if(bgMusic.paused){
+    if (bgMusic.paused) {
 
-            playCurrentTrack();
-
-            musicBtn.textContent = "⏸ Музыка";
-
-        }else{
-
-            bgMusic.pause();
-
-            musicBtn.textContent = "▶ Музыка";
-
+        // Если трек ещё не загружен — загружаем его
+        if (!bgMusic.src) {
+            bgMusic.src = playlist[currentTrack];
         }
 
-    };
+        await bgMusic.play().catch(() => {});
+
+        musicBtn.textContent = "⏸ Музыка";
+
+    } else {
+
+        bgMusic.pause();
+
+        musicBtn.textContent = "▶ Музыка";
+
+    }
+
+};
 
 }
 
