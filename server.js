@@ -52,6 +52,12 @@ function voice(text) {
     io.emit("voice", text);
 }
 
+function voice1(text) {
+
+    if (!adminId) return;
+
+    io.emit("voice1", text);
+}
 
 function getPlayerBySlot(slot) {
 
@@ -860,6 +866,58 @@ socket.on("endGame", () => {
     finishGame();
 
 
+
+});
+
+socket.on("oneMinute", ()=>{
+
+    if(socket.id !== adminId)
+        return;
+
+    voice1(
+        "Ваша одна минута на поговорить начинается прямо сейчас."
+    );
+
+    let seconds = 60;
+
+    io.to(adminId).emit(
+        "minuteTimer",
+        seconds
+    );
+
+    const timer = setInterval(()=>{
+
+        seconds--;
+
+        io.to(adminId).emit(
+            "minuteTimer",
+            seconds
+        );
+
+        if(seconds===10){
+
+            voice1(
+                "Осталось десять секунд."
+            );
+
+        }
+
+        if(seconds<=0){
+
+            clearInterval(timer);
+
+            voice1(
+                "Минута закончилась."
+            );
+
+            io.to(adminId).emit(
+                "minuteTimer",
+                0
+            );
+
+        }
+
+    },1000);
 
 });
 

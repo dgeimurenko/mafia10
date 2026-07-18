@@ -41,6 +41,9 @@ const playerName = document.getElementById("playerName");
 
 const timer = document.getElementById("timer");
 
+const oneMinuteBtn = document.getElementById("oneMinuteBtn");
+const minuteTimer = document.getElementById("minuteTimer");
+
 
 
 let currentName = "";
@@ -130,6 +133,16 @@ if(volumeSlider){
     volumeSlider.oninput = ()=>{
 
         bgMusic.volume = volumeSlider.value / 100;
+
+    };
+
+}
+
+if(oneMinuteBtn){
+
+    oneMinuteBtn.onclick = ()=>{
+
+        socket.emit("oneMinute");
 
     };
 
@@ -323,7 +336,18 @@ if (shuffleBtn) {
 
 }
 
+socket.on("minuteTimer", seconds=>{
 
+    if(!minuteTimer) return;
+
+    minuteTimer.innerText =
+        `⏱ ${seconds} сек.`;
+
+    if(seconds<=0){
+        minuteTimer.innerText="";
+    }
+
+});
 
 // ======================
 // Роль
@@ -439,6 +463,29 @@ text=>{
 
     };
     };
+
+    speechSynthesis.speak(msg1);
+    
+
+
+});
+
+socket.on(
+"voice1",
+text=>{
+
+    if(!isAdmin) return;
+
+    if(voiceText)
+        voiceText.innerText=text;
+
+    speechSynthesis.cancel();
+
+    const msg1 =
+        new SpeechSynthesisUtterance(text);
+
+
+    msg1.lang="ru-RU";
 
     speechSynthesis.speak(msg1);
     
