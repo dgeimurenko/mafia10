@@ -453,68 +453,7 @@ io.on("connection", socket => {
 
     });
 
-
-
     // ======================
-    // Игрок принял роль
-    // ======================
-
-    socket.on("roleAccepted", () => {
-
-
-        let player = players.find(
-            p => p.id === socket.id
-        );
-
-
-        if (!player) return;
-
-
-        if (player.accepted) return;
-
-
-
-        player.accepted = true;
-
-
-        acceptedPlayers++;
-
-
-        sendPlayersToAdmin();
-
-
-
-        if (
-    acceptedPlayers === players.length
-) {
-
-
-    gameState="ready";
-
-
-    io.emit(
-        "allRolesAccepted"
-    );
-
-
-
-    setTimeout(()=>{
-
-
-        startMafiaPhase();
-
-
-    },3000);
-
-
-
-}
-
-
-    });
-
-
-// ======================
 // Начало ночи
 // ======================
 
@@ -794,6 +733,64 @@ socket.on("sheriffFinished", () => {
 
 
 });
+
+    // ======================
+    // Игрок принял роль
+    // ======================
+
+    socket.on("roleAccepted", () => {
+
+
+        let player = players.find(
+            p => p.id === socket.id
+        );
+
+
+        if (!player) return;
+
+
+        if (player.accepted) return;
+
+
+
+        player.accepted = true;
+
+
+        acceptedPlayers++;
+
+
+        sendPlayersToAdmin();
+
+
+
+        if (
+    acceptedPlayers === players.length
+    ) {
+
+
+    gameState="ready";
+
+
+    io.emit(
+        "allRolesAccepted"
+    );
+
+
+
+    setTimeout(()=>{
+
+
+        startMafiaPhase();
+
+
+    },3000);
+
+
+
+        }
+
+
+    });
 
 
 
