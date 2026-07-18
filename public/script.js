@@ -314,6 +314,7 @@ socket.on(
 "voice",
 text=>{
 
+    if(!isAdmin) return;
 
     if(voiceText)
         voiceText.innerText=text;
