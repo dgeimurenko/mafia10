@@ -48,24 +48,85 @@ let currentName = "";
 
 const bgMusic = document.getElementById("bgMusic");
 const musicBtn = document.getElementById("musicBtn");
+const nextTrackBtn = document.getElementById("nextTrackBtn");
+const volumeSlider = document.getElementById("volumeSlider");
 
-bgMusic.volume = 0.2; // 20% громкости
+const playlist = [
+    "music/track1.m4a",
+    "music/track2.m4a",
+    "music/track3.m4a"
+];
 
-musicBtn.onclick = async () => {
+let currentTrack = 0;
 
-    if (bgMusic.paused) {
+bgMusic.loop = false;
+bgMusic.volume = 0.2;
 
-        await bgMusic.play();
-        musicBtn.textContent = "⏸ Музыка";
+function playCurrentTrack(){
 
-    } else {
+    bgMusic.src = playlist[currentTrack];
 
-        bgMusic.pause();
-        musicBtn.textContent = "▶ Музыка";
+    bgMusic.play().catch(()=>{});
 
-    }
+}
+
+if(musicBtn){
+
+    musicBtn.onclick = async ()=>{
+
+        if(bgMusic.paused){
+
+            playCurrentTrack();
+
+            musicBtn.textContent = "⏸ Музыка";
+
+        }else{
+
+            bgMusic.pause();
+
+            musicBtn.textContent = "▶ Музыка";
+
+        }
+
+    };
+
+}
+
+if(nextTrackBtn){
+
+    nextTrackBtn.onclick = ()=>{
+
+        currentTrack++;
+
+        if(currentTrack >= playlist.length)
+            currentTrack = 0;
+
+        playCurrentTrack();
+
+    };
+
+}
+
+bgMusic.onended = ()=>{
+
+    currentTrack++;
+
+    if(currentTrack >= playlist.length)
+        currentTrack = 0;
+
+    playCurrentTrack();
 
 };
+
+if(volumeSlider){
+
+    volumeSlider.oninput = ()=>{
+
+        bgMusic.volume = volumeSlider.value / 100;
+
+    };
+
+}
 
 // ======================
 // Админ
