@@ -48,7 +48,7 @@ function shuffle(array) {
 function voice(text) {
 
     io.emit("voice", text);
-
+    io.emit("voice", text);
 }
 
 
@@ -104,7 +104,55 @@ function assignRoles() {
 
 }
 
+function startNight(){
 
+
+    gameState = "night";
+
+
+    voice(
+        "Наступает ночь. Город засыпает."
+    );
+
+
+
+    setTimeout(()=>{
+
+
+        gameState="donKill";
+
+
+        voice(
+            "Просыпается дон и выбирает кого убивает."
+        );
+
+
+
+        const don = players.find(
+            p =>
+            p.role === "Дон Мафии" &&
+            p.alive
+        );
+
+
+
+        if(don){
+
+
+            io.to(don.id).emit(
+                "donKill"
+            );
+
+
+        }
+
+
+
+    },10000);
+
+
+
+}
 
 function sendRoles() {
 
@@ -441,7 +489,7 @@ io.on("connection", socket => {
 ) {
 
 
-    gameState="night";
+    gameState="ready";
 
 
     io.emit(
@@ -504,7 +552,7 @@ socket.on("startNight", () => {
 
 
 
-    startMafiaPhase();
+    startNight();
 
 
 });

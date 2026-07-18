@@ -216,10 +216,8 @@ startBtn.onclick=()=>{
 if(nightBtn){
 
 nightBtn.onclick=()=>{
-
-    socket.emit(
-        "startNight"
-    );
+    console.log("Нажата кнопка начала ночи");
+    socket.emit("startNight");
 
 };
 
