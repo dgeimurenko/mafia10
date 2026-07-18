@@ -279,6 +279,8 @@ function startSheriffPhase(){
 
             gameState="day";
 
+            io.to(adminId).emit("pauseMusic");
+
 
         },10000);
 
@@ -827,7 +829,7 @@ function startDay() {
     }
 
 
-
+    io.to(adminId).emit("pauseMusic");
     voice(
         `Город просыпается. Сегодня был убит игрок номер ${nightKill}.`
     );
@@ -886,7 +888,7 @@ socket.on("oneMinute", ()=>{
     }
 
     voice1(
-        "Ваша одна минута на поговорить начинается прямо сейчас."
+        "Ваша одна минута начинается прямо сейчас."
     );
 
     let seconds = 60;

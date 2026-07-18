@@ -526,6 +526,15 @@ socket.on(
 });
 
 
+socket.on("pauseMusic", () => {
+
+    if (bgMusic && !bgMusic.paused) {
+
+        bgMusic.pause();
+
+    }
+
+});
 
 
 // ======================
