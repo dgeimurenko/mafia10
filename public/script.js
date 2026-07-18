@@ -54,6 +54,19 @@ const musicBtn = document.getElementById("musicBtn");
 const nextTrackBtn = document.getElementById("nextTrackBtn");
 const volumeSlider = document.getElementById("volumeSlider");
 
+const resetMinuteBtn =
+    document.getElementById("resetMinuteBtn");
+
+if(resetMinuteBtn){
+
+    resetMinuteBtn.onclick = ()=>{
+
+        socket.emit("resetMinute");
+
+    };
+
+}
+
 const playlist = [
     "music/track1.m4a",
     "music/track2.m4a",

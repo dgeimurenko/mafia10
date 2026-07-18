@@ -6,6 +6,9 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+let minuteInterval = null;
+let minuteTimeout10 = null;
+
 app.use(express.static("public"));
 
 const ROLES = [
@@ -874,6 +877,14 @@ socket.on("oneMinute", ()=>{
     if(socket.id !== adminId)
         return;
 
+    if(minuteInterval){
+        clearInterval(minuteInterval);
+    }
+
+    if(minuteTimeout10){
+        clearTimeout(minuteTimeout10);
+    }
+
     voice1(
         "Ваша одна минута на поговорить начинается прямо сейчас."
     );
@@ -885,7 +896,15 @@ socket.on("oneMinute", ()=>{
         seconds
     );
 
-    const timer = setInterval(()=>{
+    minuteTimeout10 = setTimeout(()=>{
+
+        voice1(
+            "Осталось десять секунд."
+        );
+
+    },50000);
+
+    minuteInterval = setInterval(()=>{
 
         seconds--;
 
@@ -894,17 +913,13 @@ socket.on("oneMinute", ()=>{
             seconds
         );
 
-        if(seconds===10){
-
-            voice1(
-                "Осталось десять секунд."
-            );
-
-        }
-
         if(seconds<=0){
 
-            clearInterval(timer);
+            clearInterval(minuteInterval);
+            minuteInterval = null;
+
+            clearTimeout(minuteTimeout10);
+            minuteTimeout10 = null;
 
             voice1(
                 "Минута закончилась."
@@ -921,6 +936,31 @@ socket.on("oneMinute", ()=>{
 
 });
 
+socket.on("resetMinute", ()=>{
+
+    if(socket.id !== adminId)
+        return;
+
+    if(minuteInterval){
+
+        clearInterval(minuteInterval);
+        minuteInterval = null;
+
+    }
+
+    if(minuteTimeout10){
+
+        clearTimeout(minuteTimeout10);
+        minuteTimeout10 = null;
+
+    }
+
+    io.to(adminId).emit(
+        "minuteTimer",
+        0
+    );
+
+});
 
 
 function finishGame() {
