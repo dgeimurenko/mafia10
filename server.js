@@ -271,15 +271,12 @@ function startSheriffPhase(){
 
         setTimeout(()=>{
 
-
+            io.to(adminId).emit("pauseMusic");
             voice(
                 "Город просыпается."
             );
 
-
             gameState="day";
-
-            io.to(adminId).emit("pauseMusic");
 
 
         },10000);
