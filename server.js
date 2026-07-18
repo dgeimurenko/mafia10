@@ -338,7 +338,7 @@ io.on("connection", socket => {
     if (socket.recovered) {
         console.log("Соединение восстановлено");
     }
-    
+
     // ======================
     // Регистрация администратора
     // ======================
@@ -1045,33 +1045,44 @@ function finishGame() {
 
 socket.on("disconnect", () => {
 
-
     console.log(
         "Отключился:",
         socket.id
     );
 
-
-
     if (socket.id === adminId) {
-
         adminId = null;
-
+        return;
     }
 
+    const player = players.find(
+        p => p.id === socket.id
+    );
 
+    if (!player) return;
 
-    players =
-        players.filter(
-            player =>
-            player.id !== socket.id
-        );
+    player.offline = true;
 
+    setTimeout(() => {
 
+        // Если за 5 минут игрок не переподключился,
+        // удаляем его окончательно.
+        if (player.offline) {
+
+            players = players.filter(
+                p => p.id !== player.id
+            );
+
+            sendPlayersToAdmin();
+
+            console.log(
+                `${player.name} удалён после долгого отсутствия`
+            );
+        }
+
+    }, 5 * 60 * 1000);
 
     sendPlayersToAdmin();
-
-
 
 });
 
