@@ -4,7 +4,12 @@ const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+    connectionStateRecovery: {
+        maxDisconnectionDuration: 360000, // 2 минуты
+        skipMiddlewares: true
+    }
+});
 
 let minuteInterval = null;
 let minuteTimeout10 = null;
@@ -330,7 +335,10 @@ io.on("connection", socket => {
 
     console.log("Подключился:", socket.id);
 
-
+    if (socket.recovered) {
+        console.log("Соединение восстановлено");
+    }
+    
     // ======================
     // Регистрация администратора
     // ======================
