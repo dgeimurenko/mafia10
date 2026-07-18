@@ -46,6 +46,26 @@ const timer = document.getElementById("timer");
 let currentName = "";
 
 
+const bgMusic = document.getElementById("bgMusic");
+const musicBtn = document.getElementById("musicBtn");
+
+bgMusic.volume = 0.2; // 20% громкости
+
+musicBtn.onclick = async () => {
+
+    if (bgMusic.paused) {
+
+        await bgMusic.play();
+        musicBtn.textContent = "⏸ Музыка";
+
+    } else {
+
+        bgMusic.pause();
+        musicBtn.textContent = "▶ Музыка";
+
+    }
+
+};
 
 // ======================
 // Админ
@@ -323,6 +343,12 @@ text=>{
 
     speechSynthesis.cancel();
 
+    // Приостанавливаем музыку
+    const resumeMusic = bgMusic && !bgMusic.paused;
+
+    if (resumeMusic) {
+        bgMusic.pause();
+    }
 
     const msg1 =
         new SpeechSynthesisUtterance(text);
@@ -335,6 +361,15 @@ text=>{
         const msg2 = new SpeechSynthesisUtterance(text);
         msg2.lang = "ru-RU";
         speechSynthesis.speak(msg2);
+
+        msg2.onend = () => {
+
+        // Возобновляем музыку
+        if (resumeMusic) {
+            bgMusic.play().catch(() => {});
+        }
+
+    };
     };
 
     speechSynthesis.speak(msg1);
