@@ -311,15 +311,21 @@ text=>{
     speechSynthesis.cancel();
 
 
-    const msg =
+    const msg1 =
         new SpeechSynthesisUtterance(text);
 
 
-    msg.lang="ru-RU";
+    msg1.lang="ru-RU";
 
 
-    speechSynthesis.speak(msg);
+    msg1.onend = () => {
+        const msg2 = new SpeechSynthesisUtterance(text);
+        msg2.lang = "ru-RU";
+        speechSynthesis.speak(msg2);
+    };
 
+    speechSynthesis.speak(msg1);
+    
 
 
 });

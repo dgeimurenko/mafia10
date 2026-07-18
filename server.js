@@ -48,7 +48,6 @@ function shuffle(array) {
 function voice(text) {
 
     io.emit("voice", text);
-    io.emit("voice", text);
 }
 
 
