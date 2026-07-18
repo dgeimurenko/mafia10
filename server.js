@@ -249,18 +249,6 @@ function startSheriffPhase(){
 
 
 
-    if(sheriff){
-
-
-        io.to(sheriff.id).emit(
-            "sheriffAction"
-        );
-
-
-    }
-
-
-
     setTimeout(()=>{
 
 
@@ -471,23 +459,6 @@ socket.on("startNight", () => {
 
         return;
     }
-
-
-
-    if (
-        gameState !== "roles" &&
-        gameState !== "ready"
-    ) {
-
-        console.log(
-            "Нельзя начать ночь. Состояние:",
-            gameState
-        );
-
-        return;
-
-    }
-
 
 
     startNight();
