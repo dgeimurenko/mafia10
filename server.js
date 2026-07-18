@@ -47,6 +47,8 @@ function shuffle(array) {
 
 function voice(text) {
 
+    if (!adminId) return;
+
     io.emit("voice", text);
 }
 
@@ -439,6 +441,29 @@ io.on("connection", socket => {
 
 
     });
+
+    socket.on("shufflePlayers", () => {
+
+    if (socket.id !== adminId) return;
+
+    players = shuffle(players);
+
+    players.forEach((player, index) => {
+        player.slot = index + 1;
+    });
+
+    sendPlayersToAdmin();
+
+    io.emit("playersShuffled",
+        players.map(player => ({
+            id: player.id,
+            slot: player.slot,
+            name: player.name,
+            alive: player.alive
+        }))
+    );
+
+});
 
     // ======================
 // Начало ночи

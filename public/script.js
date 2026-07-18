@@ -26,6 +26,8 @@ const joinBtn = document.getElementById("join");
 const startBtn = document.getElementById("startGame");
 const nightBtn = document.getElementById("startNight");
 const endBtn = document.getElementById("endGame");
+const shuffleBtn = document.getElementById("shuffleBtn");
+
 
 const playersList = document.getElementById("players");
 
@@ -220,6 +222,16 @@ nightBtn.onclick=()=>{
     socket.emit("startNight");
 
 };
+
+}
+
+if (shuffleBtn) {
+
+    shuffleBtn.onclick = () => {
+
+        socket.emit("shufflePlayers");
+
+    };
 
 }
 
